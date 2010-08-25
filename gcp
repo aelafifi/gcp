@@ -1,0 +1,215 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+"""
+gcp: Goffi's CoPier
+Copyright (C) 2010  Jérôme Poisson (goffi@goffi.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
+### logging ###
+import logging
+from logging import debug, info, error, warning
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(message)s')
+###
+import sys
+import os,os.path
+from optparse import OptionParser #To be replaced by argparse ASAP
+try:
+    import gobject
+    #DBus
+    import dbus, dbus.glib
+    import dbus.service
+    import dbus.mainloop.glib
+except ImportError,e:
+    error("Error during import")
+    error("Please check dependecies:",e)
+    exit(2)
+try:
+    from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
+    pbar_available=True
+except ImportError, e:
+    info ('ProgressBar not available, please download it at http://pypi.python.org/pypi/progressbar')
+    info ('Progress bar deactivated\n--\n')
+    pbar_available=False
+
+NAME = "gcp (Goffi's copier)"
+NAME_SHORT = "gcp"
+VERSION = '0.1'
+
+ABOUT = NAME+" v"+VERSION+""" (c) Jérôme Poisson (aka Goffi) 2010
+
+---
+"""+NAME+""" Copyright (C) 2010  Jérôme Poisson
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions.
+---
+
+This software is an advanced file copier
+Get the latest version at http://www.goffi.org
+"""
+
+const_DBUS_INTERFACE = "org.goffi.gcp" 
+const_DBUS_PATH = "/org/goffi/gcp" 
+
+
+class DbusObject(dbus.service.Object):
+
+    def __init__(self, gcp, bus, path):
+        self._gcp = gcp
+        dbus.service.Object.__init__(self, bus, path)
+        debug("Init DbusObject...")
+        self.cb={}
+    
+    @dbus.service.method(const_DBUS_INTERFACE,
+                         in_signature='', out_signature='s')
+    def getVersion(self):
+        """Get gcp version
+        @return: version as string"""
+        return VERSION
+
+    @dbus.service.method(const_DBUS_INTERFACE,
+                         in_signature='sas', out_signature='b')
+    def addArgs(self, source_path, args):
+        """Add arguments to gcp as if there were entered on its own command line
+        @source_path: current working dir to use as base for arguments, as given by os.getcwd()
+        @args: list of strings - without command name -, as given by sys.argv[1:]"""
+        return self._gcp.parseArguments(args, source_path)
+
+class GCP():
+
+    def __init__(self):
+        try:
+            sessions_bus = dbus.SessionBus()
+            db_object = sessions_bus.get_object(const_DBUS_INTERFACE,
+                                const_DBUS_PATH)
+            self.gcp_main = dbus.Interface(db_object,
+                                dbus_interface=const_DBUS_INTERFACE)
+            self._main_instance = False
+
+        except dbus.exceptions.DBusException,e:
+            if e._dbus_error_name=='org.freedesktop.DBus.Error.ServiceUnknown':
+                self.launchDbusMainInstance()
+                debug ("gcp launched")
+                self._main_instance = True
+            else:
+                raise e
+
+    def launchDbusMainInstance(self):
+        debug ("Init DBus...")
+        session_bus = dbus.SessionBus()
+        self.dbus_name = dbus.service.BusName(const_DBUS_INTERFACE, session_bus)
+        self.dbus_object = DbusObject(self, session_bus, const_DBUS_PATH)
+
+        self.copy_list = []
+        self.mounts = self.__getMountPoints()
+
+    def getFsType(self, path):
+        fs=''
+        for mount in self.mounts:
+            if path.startswith(mount) and len(self.mounts[mount])>len(fs):
+                fs = self.mounts[mount]
+        return fs
+
+    def __getMountPoints(self):
+        """Parse /proc/mounts to get currently mounted devices"""
+        #TODO: reparse when a new device is added/a device is removed
+        ret =  {}
+        try:
+            with open("/proc/mounts",'r') as mounts:
+                for line in mounts.readlines():
+                   fs_spec, fs_file, fs_vfstype, fs_mntops, fs_freq, fs_passno = line.split(' ')
+                   ret[fs_file] = fs_vfstype
+        except:
+            error ("Can't read mounts table")
+        return ret
+
+    def __appendToList(self, path, options):
+        """Add a file to the copy list
+        @param path: absolute path of file
+        @param options: options as return by optparse"""
+        debug ("Adding to copy list: %s (%s)", path, self.getFsType(path))
+        self.copy_list.append((path, options))
+
+    def __appendDirToList(self, dirpath, options):
+        """Add recursively directory to the copy list
+        @param path: absolute path of dir
+        @param options: options as return by optparse"""
+        try:
+            for filename in os.listdir(dirpath):
+                filepath = os.path.join(dirpath,filename)
+                if os.path.isdir(filepath):
+                    self.__appendDirToList(filepath, options)
+                else:
+                    self.__appendToList(filepath,options)
+        except OSError,e:
+            error("Can't copy %(path)s: %(exception)s" % {'path':dirpath, 'exception':e.strerror})
+
+    def __checkArgs(self, options, source_path, args):
+        """Check thats args are files, and add them to copy list"""
+        for path in args:
+            abspath = os.path.normpath(os.path.join(source_path, path))
+            if not os.path.exists(abspath):
+                warning("The path given in arg doesn't exist or is not accessible: %s",abspath)
+            else:
+                if os.path.isdir(abspath):
+                    if not options.recursive:
+                        warning ('omitting directory "%s"' % abspath)
+                    else:
+                        self.__appendDirToList(abspath, options)
+                else:
+                    self.__appendToList(abspath,options)
+
+
+    def parseArguments(self, full_args=sys.argv[1:], source_path = os.getcwd()):
+        _usage="""
+        %prog [options] FILE1 [FILE2 ...] DEST
+
+        %prog --help for options list
+        """
+        parser = OptionParser(usage=_usage,version=ABOUT)
+
+        parser.add_option("-r", "--recursive", action="store_true", default=False,
+                    help="copy directories recursively")
+        
+        (options, args) = parser.parse_args(full_args)
+        
+        if not self._main_instance:
+            if args:
+                info ("There is already one instance of %s running, pluging to it" % NAME_SHORT)
+                self.gcp_main.addArgs(os.getcwd(),full_args)
+            else:
+                error ("There is already one instance of %s running, but we have no argument to send" % NAME_SHORT)
+                sys.exit(1)
+        else:
+            debug("adding args to gcp: %s",args)
+            self.__checkArgs(options, source_path, args)
+
+    def go(self):
+        self.loop = gobject.MainLoop()
+        try:
+            self.loop.run()
+        except KeyboardInterrupt:
+            info("User interruption: good bye")
+
+
+if __name__ == "__main__":
+    gcp = GCP()
+    gcp.parseArguments()
+    if gcp._main_instance:
+        gcp.go()
+
