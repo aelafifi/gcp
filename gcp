@@ -28,6 +28,7 @@ logging.basicConfig(level=logging.DEBUG,
 import sys
 import os,os.path
 from optparse import OptionParser #To be replaced by argparse ASAP
+import cPickle as pickle
 try:
     import gobject
     #DBus
@@ -83,11 +84,16 @@ class DbusObject(dbus.service.Object):
         return VERSION
 
     @dbus.service.method(const_DBUS_INTERFACE,
-                         in_signature='sas', out_signature='b')
+                         in_signature='ss', out_signature='bs')
     def addArgs(self, source_path, args):
         """Add arguments to gcp as if there were entered on its own command line
-        @source_path: current working dir to use as base for arguments, as given by os.getcwd()
-        @args: list of strings - without command name -, as given by sys.argv[1:]"""
+        @param source_path: current working dir to use as base for arguments, as given by os.getcwd()
+        @param args: serialized (wich pickle) list of strings - without command name -, as given by sys.argv[1:].
+        @return: success (boolean) and error message if any (string)"""
+        try:
+            args = pickle.loads(str(args))
+        except TypeError, pickle.UnpicklingError:
+            return (False, "INTERNAL ERROR: invalid arguments")
         return self._gcp.parseArguments(args, source_path)
 
 class GCP():
@@ -117,6 +123,8 @@ class GCP():
 
         self.copy_list = []
         self.mounts = self.__getMountPoints()
+        self.files_left = 0
+        self.bytes_left = 0
 
     def getFsType(self, path):
         fs=''
@@ -128,6 +136,7 @@ class GCP():
     def __getMountPoints(self):
         """Parse /proc/mounts to get currently mounted devices"""
         #TODO: reparse when a new device is added/a device is removed
+        #(check freedesktop mounting signals)
         ret =  {}
         try:
             with open("/proc/mounts",'r') as mounts:
@@ -138,14 +147,21 @@ class GCP():
             error ("Can't read mounts table")
         return ret
 
-    def __appendToList(self, path, options):
+    def __appendToList(self, path, destpath, options):
         """Add a file to the copy list
         @param path: absolute path of file
         @param options: options as return by optparse"""
-        debug ("Adding to copy list: %s (%s)", path, self.getFsType(path))
-        self.copy_list.append((path, options))
+        debug ("Adding to copy list: %s ==> %s (%s)", path, destpath, self.getFsType(destpath))
+        try:
+            self.bytes_left+=os.path.getsize(path)
+            self.files_left+=1
+            self.copy_list.append((path, destpath, options))
+            print "total size:", float(self.bytes_left/1024/1024), "Mb (%i)" % self.files_left
+        except OSError,e:
+            error("Can't copy %(path)s: %(exception)s" % {'path':path, 'exception':e.strerror})
 
-    def __appendDirToList(self, dirpath, options):
+
+    def __appendDirToList(self, dirpath, destpath, options):
         """Add recursively directory to the copy list
         @param path: absolute path of dir
         @param options: options as return by optparse"""
@@ -153,53 +169,76 @@ class GCP():
             for filename in os.listdir(dirpath):
                 filepath = os.path.join(dirpath,filename)
                 if os.path.isdir(filepath):
-                    self.__appendDirToList(filepath, options)
+                    full_destpath = os.path.join(destpath,filename)
+                    self.__appendDirToList(filepath, full_destpath, options)
                 else:
-                    self.__appendToList(filepath,options)
+                    self.__appendToList(filepath, destpath, options)
         except OSError,e:
             error("Can't copy %(path)s: %(exception)s" % {'path':dirpath, 'exception':e.strerror})
 
     def __checkArgs(self, options, source_path, args):
         """Check thats args are files, and add them to copy list"""
+        assert(len (args)>=2)
+        try:
+            destpath = os.path.normpath(os.path.join(os.path.expanduser(source_path), args.pop()))
+        except OSError,e:
+            error ("Invalid destpath: %s",e)
+        
         for path in args:
-            abspath = os.path.normpath(os.path.join(source_path, path))
+            abspath = os.path.normpath(os.path.join(os.path.expanduser(source_path), path))
             if not os.path.exists(abspath):
                 warning("The path given in arg doesn't exist or is not accessible: %s",abspath)
             else:
                 if os.path.isdir(abspath):
+                    full_destpath = destpath if os.path.isabs(path) else os.path.normpath(os.path.join(destpath, path))
                     if not options.recursive:
                         warning ('omitting directory "%s"' % abspath)
                     else:
-                        self.__appendDirToList(abspath, options)
+                        self.__appendDirToList(abspath, full_destpath, options)
                 else:
-                    self.__appendToList(abspath,options)
+                    self.__appendToList(abspath, destpath, options)
 
 
     def parseArguments(self, full_args=sys.argv[1:], source_path = os.getcwd()):
+        """Parse arguments and add files to queue
+        @param full_args: list of arguments strings (without program name)
+        @param source_path: path from where the arguments come, ad given by os.getcwd()
+        @return: a tuple (boolean, message) where the boolean is the success of the arguments
+                 validation, and message is the error message to print when necessary"""
         _usage="""
         %prog [options] FILE1 [FILE2 ...] DEST
 
         %prog --help for options list
         """
+        for idx in range(len(full_args)):
+            if isinstance(full_args[idx], unicode):
+                #We don't want unicode as some filenames can be invalid unicode
+                full_args[idx] = full_args[idx].encode('utf-8')
+        
         parser = OptionParser(usage=_usage,version=ABOUT)
 
         parser.add_option("-r", "--recursive", action="store_true", default=False,
                     help="copy directories recursively")
         
+        parser.add_option("--no-unicode-fix", action="store_true", default=False,
+                    help="don't fixe name encoding errors") #TODO
         (options, args) = parser.parse_args(full_args)
         
         if not self._main_instance:
-            if args:
-                info ("There is already one instance of %s running, pluging to it" % NAME_SHORT)
-                self.gcp_main.addArgs(os.getcwd(),full_args)
-            else:
-                error ("There is already one instance of %s running, but we have no argument to send" % NAME_SHORT)
-                sys.exit(1)
+            info ("There is already one instance of %s running, pluging to it" % NAME_SHORT)
+            #XXX: we have to serialize data as dbus only accept valid unicode, and filenames
+            #     can have invalid unicode.
+            return self.gcp_main.addArgs(os.getcwd(),pickle.dumps(full_args))
         else:
+            if len(args) < 2:
+                _error_msg = "Wrong number of arguments"
+                return (False, _error_msg)
             debug("adding args to gcp: %s",args)
             self.__checkArgs(options, source_path, args)
+        return (True,'')
 
     def go(self):
+        """Launch main loop"""
         self.loop = gobject.MainLoop()
         try:
             self.loop.run()
@@ -209,7 +248,10 @@ class GCP():
 
 if __name__ == "__main__":
     gcp = GCP()
-    gcp.parseArguments()
+    success,message = gcp.parseArguments()
+    if not success:
+        error(message)
+        exit(1)
     if gcp._main_instance:
         gcp.go()
 
