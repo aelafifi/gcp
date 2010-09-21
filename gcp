@@ -129,7 +129,7 @@ class GCP():
     def getFsType(self, path):
         fs=''
         for mount in self.mounts:
-            if path.startswith(mount) and len(self.mounts[mount])>len(fs):
+            if path.startswith(mount) and len(self.mounts[mount])>=len(fs):
                 fs = self.mounts[mount]
         return fs
 
