@@ -65,7 +65,8 @@ Get the latest version at http://www.goffi.org
 """
 
 const_DBUS_INTERFACE = "org.goffi.gcp" 
-const_DBUS_PATH = "/org/goffi/gcp" 
+const_DBUS_PATH = "/org/goffi/gcp"
+const_BUFF_SIZE = 4096
 
 
 class DbusObject(dbus.service.Object):
@@ -112,6 +113,7 @@ class GCP():
                 self.launchDbusMainInstance()
                 debug ("gcp launched")
                 self._main_instance = True
+                self.buffer_size = const_BUFF_SIZE
             else:
                 raise e
 
@@ -147,32 +149,38 @@ class GCP():
             error ("Can't read mounts table")
         return ret
 
-    def __appendToList(self, path, destpath, options):
+    def __appendToList(self, path, dest_path, options):
         """Add a file to the copy list
         @param path: absolute path of file
         @param options: options as return by optparse"""
-        debug ("Adding to copy list: %s ==> %s (%s)", path, destpath, self.getFsType(destpath))
+        debug ("Adding to copy list: %s ==> %s (%s)", path, dest_path, self.getFsType(dest_path))
         try:
             self.bytes_left+=os.path.getsize(path)
             self.files_left+=1
-            self.copy_list.append((path, destpath, options))
+            self.copy_list.append((path, dest_path, options))
             print "total size:", float(self.bytes_left/1024/1024), "Mb (%i)" % self.files_left
         except OSError,e:
             error("Can't copy %(path)s: %(exception)s" % {'path':path, 'exception':e.strerror})
 
 
-    def __appendDirToList(self, dirpath, destpath, options):
+    def __appendDirToList(self, dirpath, dest_path, options):
         """Add recursively directory to the copy list
         @param path: absolute path of dir
         @param options: options as return by optparse"""
+        #We first check that the dest path exists, and create it if needed
+        if not os.path.exists(dest_path):
+            debug ("Creating directory %s" % dest_path)
+            os.makedirs(dest_path) #TODO: check permissions
+        #TODO: check that dest_path is an accessible dir,
+        #      and skip file/write error in log if needed
         try:
             for filename in os.listdir(dirpath):
                 filepath = os.path.join(dirpath,filename)
                 if os.path.isdir(filepath):
-                    full_destpath = os.path.join(destpath,filename)
-                    self.__appendDirToList(filepath, full_destpath, options)
+                    full_dest_path = os.path.join(dest_path,filename)
+                    self.__appendDirToList(filepath, full_dest_path, options)
                 else:
-                    self.__appendToList(filepath, destpath, options)
+                    self.__appendToList(filepath, dest_path, options)
         except OSError,e:
             error("Can't copy %(path)s: %(exception)s" % {'path':dirpath, 'exception':e.strerror})
 
@@ -180,9 +188,9 @@ class GCP():
         """Check thats args are files, and add them to copy list"""
         assert(len (args)>=2)
         try:
-            destpath = os.path.normpath(os.path.join(os.path.expanduser(source_path), args.pop()))
+            dest_path = os.path.normpath(os.path.join(os.path.expanduser(source_path), args.pop()))
         except OSError,e:
-            error ("Invalid destpath: %s",e)
+            error ("Invalid dest_path: %s",e)
         
         for path in args:
             abspath = os.path.normpath(os.path.join(os.path.expanduser(source_path), path))
@@ -190,14 +198,54 @@ class GCP():
                 warning("The path given in arg doesn't exist or is not accessible: %s",abspath)
             else:
                 if os.path.isdir(abspath):
-                    full_destpath = destpath if os.path.isabs(path) else os.path.normpath(os.path.join(destpath, path))
+                    full_dest_path = dest_path if os.path.isabs(path) else os.path.normpath(os.path.join(dest_path, path))
                     if not options.recursive:
                         warning ('omitting directory "%s"' % abspath)
                     else:
-                        self.__appendDirToList(abspath, full_destpath, options)
+                        self.__appendDirToList(abspath, full_dest_path, options)
                 else:
-                    self.__appendToList(abspath, destpath, options)
+                    self.__appendToList(abspath, dest_path, options)
 
+    def __copyNextFile(self):
+        """Take the last file in the list, and launch the copy using glib io_watch event
+           @return: True a file was added, False else""" 
+        if self.copy_list:
+            source_path, dest_path, options = self.copy_list.pop()
+            source_fd = open(source_path, 'r')
+            filename = os.path.basename(source_path)
+            assert(filename)
+            dest_file = os.path.join(dest_path,filename)
+            if os.path.exists(dest_file):
+                warning ("File [%s] already exists, skipping it !" % dest_file)
+                return True
+            dest_fd = open(dest_file, 'w')
+                
+            self.total=0
+            gobject.io_add_watch(source_fd,gobject.IO_IN,self._copyFile,(dest_fd,options), priority=gobject.PRIORITY_HIGH)
+            print "** COPYING",source_path,"==>",dest_file
+            return True
+        else:
+            #Nothing left to copy, we quit
+            self.loop.quit()
+
+    def _copyFile(self, source_fd, condition, data):
+        """Actually copy the file, callback used with io_add_watch
+        @param source_fd: file descriptor of the file to copy
+        @param condition: condition which launched the callback (glib.IO_IN)
+        @param data: tuple with (destination file descriptor, copying options)"""
+        dest_fd,options = data
+        buff = source_fd.read(self.buffer_size)
+        dest_fd.write(buff)
+        self.total += len(buff)
+        sys.stdout.write('%i written\r' % self.total)
+        if len(buff) != self.buffer_size:
+            sys.stdout.write('\n---\n')
+            source_fd.close()
+            dest_fd.close()
+            return False
+        return True
+
+        
 
     def parseArguments(self, full_args=sys.argv[1:], source_path = os.getcwd()):
         """Parse arguments and add files to queue
@@ -222,7 +270,14 @@ class GCP():
         
         parser.add_option("--no-unicode-fix", action="store_true", default=False,
                     help="don't fixe name encoding errors") #TODO
+        
+        parser.add_option("--no-progress", action="store_false", dest="progress", default=True,
+                    help="deactivate progress bar")
+        
         (options, args) = parser.parse_args(full_args)
+        if options.progress and not pbar_available:
+            warning ("Progress bar is not available, deactivating")
+            options.progress = False
         
         if not self._main_instance:
             info ("There is already one instance of %s running, pluging to it" % NAME_SHORT)
@@ -235,6 +290,7 @@ class GCP():
                 return (False, _error_msg)
             debug("adding args to gcp: %s",args)
             self.__checkArgs(options, source_path, args)
+            gobject.idle_add(self.__copyNextFile)
         return (True,'')
 
     def go(self):
