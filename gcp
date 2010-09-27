@@ -72,6 +72,7 @@ const_DBUS_INTERFACE = "org.goffi.gcp"
 const_DBUS_PATH = "/org/goffi/gcp"
 const_BUFF_SIZE = 4096
 const_PRESERVE = set(['mode','ownership','timestamps'])
+const_JOURNAL_PATH = "~/.gcp_journal"
 
 
 class DbusObject(dbus.service.Object):
@@ -101,6 +102,40 @@ class DbusObject(dbus.service.Object):
         except TypeError, pickle.UnpicklingError:
             return (False, _("INTERNAL ERROR: invalid arguments"))
         return self._gcp.parseArguments(args, source_path)
+
+class Journal():
+    def __init__(self, path=const_JOURNAL_PATH):
+        self.journal_path = os.path.expanduser(path)
+        self.journal_fd = open(self.journal_path,'w') #TODO: check and maybe save previous journals
+
+    def __del__(self):
+        self.journal_fd.flush()
+        self.journal_fd.close()
+
+    def startFile(self, source_path):
+        """Start an entry in the journal"""
+        self.journal_fd.write(source_path+"\n")
+        self.journal_fd.flush()
+        self.success=True
+        self.errors=[]
+
+    def closeFile(self):
+        """Close the entry in the journal"""
+        if not self.success:
+            status = "FAILED"
+        else:
+            status = "OK" if not self.errors else "PARTIAL"
+        self.journal_fd.write("%(status)s: %(errors)s\n" % {'status': status, 'errors': ', '.join(self.errors)})
+        self.journal_fd.flush()
+
+    def copyFailed(self):
+        """Must be called when something is wrong with the copy itself"""
+        self.success = False
+
+    def error(self, name):
+        """Something went wrong"""
+        self.errors.append(name)
+        
 
 class GCP():
 
@@ -219,6 +254,7 @@ class GCP():
            @return: True a file was added, False else""" 
         if self.copy_list:
             source_file, dest_path, options = self.copy_list.pop()
+            self.journal.startFile(source_file)
             source_fd = open(source_file, 'rb')
             filename = os.path.basename(source_file)
             assert(filename)
@@ -226,7 +262,14 @@ class GCP():
             if os.path.exists(dest_file) and not options.force:
                 warning (_("File [%s] already exists, skipping it !") % dest_file)
                 return True
-            dest_fd = open(dest_file, 'wb')
+            try:
+                dest_fd = open(dest_file, 'wb')
+            except:
+                self.journal.copyFailed()
+                self.journal.error("can't open dest")
+                self.journal.closeFile()
+                source_fd.close()
+                return True
                 
             gobject.io_add_watch(source_fd,gobject.IO_IN,self._copyFile,
                                  (dest_fd, options), priority=gobject.PRIORITY_HIGH)
@@ -239,14 +282,35 @@ class GCP():
                 self.__pbar_finish()
             self.loop.quit()
 
+    def __copyFailed(self, reason, source_fd, dest_fd):
+        """Write the failure in the journal and close files descriptors"""
+        self.journal.copyFailed()
+        self.journal.error(reason)
+        self.journal.closeFile()
+        source_fd.close()
+        dest_fd.close()
+        
+
+
     def _copyFile(self, source_fd, condition, data):
         """Actually copy the file, callback used with io_add_watch
         @param source_fd: file descriptor of the file to copy
         @param condition: condition which launched the callback (glib.IO_IN)
         @param data: tuple with (destination file descriptor, copying options)"""
         dest_fd,options = data
-        buff = source_fd.read(self.buffer_size)
-        dest_fd.write(buff)
+
+        try:
+            buff = source_fd.read(self.buffer_size)
+        except:
+            self.__copyFailed("can't read source", source_fd, dest_fd)
+            return False
+
+        try:
+            dest_fd.write(buff)
+        except:
+            self.__copyFailed("can't write to dest", source_fd, dest_fd)
+            return False
+
         self.bytes_copied += len(buff)
         if self.progress:
             self.__pbar_update()
@@ -255,12 +319,19 @@ class GCP():
             source_fd.close()
             dest_fd.close()
             self.__post_copy(source_fd.name, dest_fd.name, options)
+            self.journal.closeFile()
             return False
         return True
 
     def __filename_fix(self, filename, options):
+        """Fix filenames incompatibilities/mistake according to options
+        @param filename: full path to the file
+        @param options: options as parsed on command line
+        @return: fixed filename"""
+        fixed_filename = filename
+
         if self.getFsType(filename) == 'vfat' and options.fs_fix:
-            filename = filename.replace('\\','_')\
+            fixed_filename = filename.replace('\\','_')\
                                .replace(':',';')\
                                .replace('*','+')\
                                .replace('?','')\
@@ -268,7 +339,10 @@ class GCP():
                                .replace('<','[')\
                                .replace('>',']')\
                                .replace('|','!')
-        return filename
+
+        if fixed_filename != filename:
+            self.journal.error('filename fixed')
+        return fixed_filename
 
     def __post_copy(self, source_file, dest_file, options):
         """Do post copy traitement (mainly managing --preserve option)"""
@@ -283,7 +357,7 @@ class GCP():
                 elif preserve == 'timestamps':
                     os.utime(dest_file, (st_atime, st_mtime))
             except OSError,e:
-                pass #TODO: complete log here
+                self.journal.error("preserve-"+preserve)
 
     def __pbar_update(self):
         """Update progress bar position, create the bar if it doesn't exist"""
@@ -378,6 +452,7 @@ class GCP():
                 return (False, _error_msg)
             debug(_("adding args to gcp: %s"),args)
             self.__checkArgs(options, source_path, args)
+            self.journal = Journal()
             gobject.idle_add(self.__copyNextFile)
         return (True,'')
 
