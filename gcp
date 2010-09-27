@@ -347,7 +347,6 @@ class GCP():
     def __post_copy(self, source_file, dest_file, options):
         """Do post copy traitement (mainly managing --preserve option)"""
         st_mode, st_ino, st_dev, st_nlink, st_uid, st_gid, st_size, st_atime, st_mtime, st_ctime = os.stat(source_file)
-        #TODO: complete log in case of errors
         for preserve in options.preserve:
             try:
                 if preserve == 'mode':
@@ -412,7 +411,7 @@ class GCP():
                     help=_("don't fixe name encoding errors")) #TODO
 
         parser.add_option("--no-fs-fix", action="store_false", dest='fs_fix', default=True,
-                    help=_("don't fixe filesystem name incompatibily")) #TODO
+                    help=_("don't fixe filesystem name incompatibily"))
 
         parser.add_option("--no-progress", action="store_false", dest="progress", default=True,
                     help=_("deactivate progress bar"))
