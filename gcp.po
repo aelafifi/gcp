@@ -1,0 +1,164 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-09-27 13:03+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: gcp:43
+msgid "Error during import"
+msgstr ""
+
+#: gcp:44
+msgid "Please check dependecies:"
+msgstr ""
+
+#: gcp:50
+msgid ""
+"ProgressBar not available, please download it at http://pypi.python.org/pypi/"
+"progressbar"
+msgstr ""
+
+#: gcp:51
+msgid ""
+"Progress bar deactivated\n"
+"--\n"
+msgstr ""
+
+#: gcp:62
+msgid ""
+"This program comes with ABSOLUTELY NO WARRANTY;\n"
+"This is free software, and you are welcome to redistribute it\n"
+"under certain conditions.\n"
+"---\n"
+"\n"
+"This software is an advanced file copier\n"
+"Get the latest version at http://www.goffi.org\n"
+msgstr ""
+
+#: gcp:82
+msgid "Init DbusObject..."
+msgstr ""
+
+#: gcp:102
+msgid "INTERNAL ERROR: invalid arguments"
+msgstr ""
+
+#: gcp:119
+msgid "gcp launched"
+msgstr ""
+
+#: gcp:126
+msgid "Init DBus..."
+msgstr ""
+
+#: gcp:155
+msgid "Can't read mounts table"
+msgstr ""
+
+#: gcp:162
+#, python-format
+msgid "Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)"
+msgstr ""
+
+#: gcp:170 gcp:192
+#, python-format
+msgid "Can't copy %(path)s: %(exception)s"
+msgstr ""
+
+#: gcp:179
+#, python-format
+msgid "Creating directory %s"
+msgstr ""
+
+#: gcp:200
+#, python-format
+msgid "Invalid dest_path: %s"
+msgstr ""
+
+#: gcp:205
+#, python-format
+msgid "The path given in arg doesn't exist or is not accessible: %s"
+msgstr ""
+
+#: gcp:210
+#, python-format
+msgid "omitting directory \"%s\""
+msgstr ""
+
+#: gcp:226
+#, python-format
+msgid "File [%s] already exists, skipping it !"
+msgstr ""
+
+#: gcp:233
+#, python-format
+msgid "COPYING %(source)s ==> %(dest)s"
+msgstr ""
+
+#: gcp:284
+msgid "Progress: "
+msgstr ""
+
+#: gcp:315
+msgid "copy directories recursively"
+msgstr ""
+
+#: gcp:318
+msgid "force overwriting of existing files"
+msgstr ""
+
+#: gcp:321
+msgid "preserve  the  specified  attributes"
+msgstr ""
+
+#: gcp:324
+msgid "don't fixe name encoding errors"
+msgstr ""
+
+#: gcp:327
+msgid "deactivate progress bar"
+msgstr ""
+
+#: gcp:330
+msgid "Show what is currently done"
+msgstr ""
+
+#: gcp:335
+msgid "Progress bar is not available, deactivating"
+msgstr ""
+
+#: gcp:345
+msgid ""
+"Invalide --preserve value\n"
+"valid values are:"
+msgstr ""
+
+#: gcp:354
+#, python-format
+msgid "There is already one instance of %s running, pluging to it"
+msgstr ""
+
+#: gcp:360
+msgid "Wrong number of arguments"
+msgstr ""
+
+#: gcp:362
+#, python-format
+msgid "adding args to gcp: %s"
+msgstr ""
+
+#: gcp:373
+msgid "User interruption: good bye"
+msgstr ""

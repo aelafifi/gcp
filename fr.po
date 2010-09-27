@@ -1,0 +1,177 @@
+# Goffi's CoPier.
+# Copyright (C) 2010 Jérôme Poisson
+# This file is distributed under the same license as the gcp package.
+# Jérôme Poisson (Goffi) <goffi@goffi.org>, 2010.
+# Goffi <goffi@goffi.org>, 2010.
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-09-27 12:42+0800\n"
+"PO-Revision-Date: 2010-09-27 13:01+0800\n"
+"Last-Translator: Goffi <goffi@goffi.org>\n"
+"Language-Team: French <goffi@goffi.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: gcp:43
+msgid "Error during import"
+msgstr "Erreur pendant l'import de bibliothèques"
+
+#: gcp:44
+msgid "Please check dependecies:"
+msgstr "Merci de vérifier les dépendances"
+
+#: gcp:50
+msgid ""
+"ProgressBar not available, please download it at http://pypi.python.org/pypi/"
+"progressbar"
+msgstr ""
+"«ProgressBar» n'est pas disponible, merci de le télécharger à http://pypi."
+"python.org/pypi/progressbar"
+
+#: gcp:51
+msgid ""
+"Progress bar deactivated\n"
+"--\n"
+msgstr ""
+"Barre de progression désactivée\n"
+"--\n"
+
+#: gcp:62
+msgid ""
+"This program comes with ABSOLUTELY NO WARRANTY;\n"
+"This is free software, and you are welcome to redistribute it\n"
+"under certain conditions.\n"
+"---\n"
+"\n"
+"This software is an advanced file copier\n"
+"Get the latest version at http://www.goffi.org\n"
+msgstr ""
+"This program comes with ABSOLUTELY NO WARRANTY;\n"
+"This is free software, and you are welcome to redistribute it\n"
+"under certain conditions.\n"
+"---\n"
+"\n"
+"Ce logiciel est un copieur de fichiers avancé\n"
+"Vous pouvez télécharger la dernière version à http://www.goffi.org\n"
+
+#: gcp:82
+msgid "Init DbusObject..."
+msgstr "Initialisation de «DbusObject»"
+
+#: gcp:102
+msgid "INTERNAL ERROR: invalid arguments"
+msgstr "ERREUR INTERNE: arguments invalides"
+
+#: gcp:119
+msgid "gcp launched"
+msgstr "gcp lancé"
+
+#: gcp:126
+msgid "Init DBus..."
+msgstr "Initialisation de Dbus..."
+
+#: gcp:155
+msgid "Can't read mounts table"
+msgstr "Impossible de lire la table des montages"
+
+#: gcp:162
+#, python-format
+msgid "Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)"
+msgstr "Ajout à la liste des copies: %(path)s ==> %(dest_path)s (%(fs_type)s)"
+
+#: gcp:170 gcp:192
+#, python-format
+msgid "Can't copy %(path)s: %(exception)s"
+msgstr "Impossible de copier %(path)s: %(exception)s"
+
+#: gcp:179
+#, python-format
+msgid "Creating directory %s"
+msgstr "Création du répertoire %s"
+
+#: gcp:200
+#, python-format
+msgid "Invalid dest_path: %s"
+msgstr "Chemin de destination invalide: %s"
+
+#: gcp:205
+#, python-format
+msgid "The path given in arg doesn't exist or is not accessible: %s"
+msgstr "Le chemin donné en argument n'existe pas ou n'est pas accessible: %s"
+
+#: gcp:210
+#, python-format
+msgid "omitting directory \"%s\""
+msgstr "Répertoire \"%s\" ignoré"
+
+#: gcp:226
+#, python-format
+msgid "File [%s] already exists, skipping it !"
+msgstr "Le fichier [%s] existe déjà, je le saute !"
+
+#: gcp:233
+#, python-format
+msgid "COPYING %(source)s ==> %(dest)s"
+msgstr "COPIE %(source)s ==> %(dest)s"
+
+#: gcp:284
+msgid "Progress: "
+msgstr "Progression: "
+
+#: gcp:315
+msgid "copy directories recursively"
+msgstr "copie les répertoire récursivement"
+
+#: gcp:318
+msgid "force overwriting of existing files"
+msgstr "force le remplacement des fichiers déjà existants"
+
+#: gcp:321
+msgid "preserve  the  specified  attributes"
+msgstr "garde les attributs spécifiés"
+
+#: gcp:324
+msgid "don't fixe name encoding errors"
+msgstr "Ne corrige pas les erreurs dans l'encodage des noms"
+
+#: gcp:327
+msgid "deactivate progress bar"
+msgstr "désactive la barre de progression"
+
+#: gcp:330
+msgid "Show what is currently done"
+msgstr "Affiche les opérations effectuées"
+
+#: gcp:335
+msgid "Progress bar is not available, deactivating"
+msgstr "La barre de progression n'est pas disponible, désactivation"
+
+#: gcp:345
+msgid ""
+"Invalide --preserve value\n"
+"valid values are:"
+msgstr ""
+"La valeur de «--preserve» est invalide\n"
+"Les valeurs valides sont:"
+
+#: gcp:354
+#, python-format
+msgid "There is already one instance of %s running, pluging to it"
+msgstr "Il y a déjà une instance de %s lancée, je m'y connecte"
+
+#: gcp:360
+msgid "Wrong number of arguments"
+msgstr "Nombre d'arguments invalide"
+
+#: gcp:362
+#, python-format
+msgid "adding args to gcp: %s"
+msgstr "ajout des arguments à gcp: %s"
+
+#: gcp:373
+msgid "User interruption: good bye"
+msgstr "Interruption par l'utilisateur: au revoir"

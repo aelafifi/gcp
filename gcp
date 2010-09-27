@@ -25,6 +25,10 @@ from logging import debug, info, error, warning
 logging.basicConfig(level=logging.INFO,
                     format='%(message)s')
 ###
+
+import gettext
+gettext.install('gcp', "i18n", unicode=True)
+
 import sys
 import os,os.path
 from optparse import OptionParser #To be replaced by argparse ASAP
@@ -36,33 +40,33 @@ try:
     import dbus.service
     import dbus.mainloop.glib
 except ImportError,e:
-    error("Error during import")
-    error("Please check dependecies:",e)
+    error(_("Error during import"))
+    error(_("Please check dependecies:"),e)
     exit(2)
 try:
     from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
     pbar_available=True
 except ImportError, e:
-    info ('ProgressBar not available, please download it at http://pypi.python.org/pypi/progressbar')
-    info ('Progress bar deactivated\n--\n')
+    info (_('ProgressBar not available, please download it at http://pypi.python.org/pypi/progressbar'))
+    info (_('Progress bar deactivated\n--\n'))
     pbar_available=False
 
 NAME = "gcp (Goffi's copier)"
 NAME_SHORT = "gcp"
 VERSION = '0.1'
 
-ABOUT = NAME+" v"+VERSION+""" (c) Jérôme Poisson (aka Goffi) 2010
+ABOUT = NAME+u" v"+VERSION+u""" (c) Jérôme Poisson (aka Goffi) 2010
 
 ---
-"""+NAME+""" Copyright (C) 2010  Jérôme Poisson
-This program comes with ABSOLUTELY NO WARRANTY;
+"""+NAME+u""" Copyright (C) 2010  Jérôme Poisson
+""" + _(u"""This program comes with ABSOLUTELY NO WARRANTY;
 This is free software, and you are welcome to redistribute it
 under certain conditions.
 ---
 
 This software is an advanced file copier
 Get the latest version at http://www.goffi.org
-"""
+""")
 
 const_DBUS_INTERFACE = "org.goffi.gcp" 
 const_DBUS_PATH = "/org/goffi/gcp"
@@ -75,7 +79,7 @@ class DbusObject(dbus.service.Object):
     def __init__(self, gcp, bus, path):
         self._gcp = gcp
         dbus.service.Object.__init__(self, bus, path)
-        debug("Init DbusObject...")
+        debug(_("Init DbusObject..."))
         self.cb={}
     
     @dbus.service.method(const_DBUS_INTERFACE,
@@ -95,7 +99,7 @@ class DbusObject(dbus.service.Object):
         try:
             args = pickle.loads(str(args))
         except TypeError, pickle.UnpicklingError:
-            return (False, "INTERNAL ERROR: invalid arguments")
+            return (False, _("INTERNAL ERROR: invalid arguments"))
         return self._gcp.parseArguments(args, source_path)
 
 class GCP():
@@ -112,14 +116,14 @@ class GCP():
         except dbus.exceptions.DBusException,e:
             if e._dbus_error_name=='org.freedesktop.DBus.Error.ServiceUnknown':
                 self.launchDbusMainInstance()
-                debug ("gcp launched")
+                debug (_("gcp launched"))
                 self._main_instance = True
                 self.buffer_size = const_BUFF_SIZE
             else:
                 raise e
 
     def launchDbusMainInstance(self):
-        debug ("Init DBus...")
+        debug (_("Init DBus..."))
         session_bus = dbus.SessionBus()
         self.dbus_name = dbus.service.BusName(const_DBUS_INTERFACE, session_bus)
         self.dbus_object = DbusObject(self, session_bus, const_DBUS_PATH)
@@ -148,20 +152,22 @@ class GCP():
                    fs_spec, fs_file, fs_vfstype, fs_mntops, fs_freq, fs_passno = line.split(' ')
                    ret[fs_file] = fs_vfstype
         except:
-            error ("Can't read mounts table")
+            error (_("Can't read mounts table"))
         return ret
 
     def __appendToList(self, path, dest_path, options):
         """Add a file to the copy list
         @param path: absolute path of file
         @param options: options as return by optparse"""
-        debug ("Adding to copy list: %s ==> %s (%s)", path, dest_path, self.getFsType(dest_path))
+        debug (_("Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)") % {"path":path,
+                                                                                     "dest_path":dest_path,
+                                                                                     "fs_type":self.getFsType(dest_path)}              )
         try:
             self.bytes_total+=os.path.getsize(path)
             self.files_left+=1
             self.copy_list.insert(0,(path, dest_path, options))
         except OSError,e:
-            error("Can't copy %(path)s: %(exception)s" % {'path':path, 'exception':e.strerror})
+            error(_("Can't copy %(path)s: %(exception)s") % {'path':path, 'exception':e.strerror})
 
 
     def __appendDirToList(self, dirpath, dest_path, options):
@@ -170,7 +176,7 @@ class GCP():
         @param options: options as return by optparse"""
         #We first check that the dest path exists, and create it if needed
         if not os.path.exists(dest_path):
-            debug ("Creating directory %s" % dest_path)
+            debug (_("Creating directory %s") % dest_path)
             os.makedirs(dest_path) #TODO: check permissions
         #TODO: check that dest_path is an accessible dir,
         #      and skip file/write error in log if needed
@@ -183,7 +189,7 @@ class GCP():
                 else:
                     self.__appendToList(filepath, dest_path, options)
         except OSError,e:
-            error("Can't copy %(path)s: %(exception)s" % {'path':dirpath, 'exception':e.strerror})
+            error(_("Can't copy %(path)s: %(exception)s") % {'path':dirpath, 'exception':e.strerror})
 
     def __checkArgs(self, options, source_path, args):
         """Check thats args are files, and add them to copy list"""
@@ -191,17 +197,17 @@ class GCP():
         try:
             dest_path = os.path.normpath(os.path.join(os.path.expanduser(source_path), args.pop()))
         except OSError,e:
-            error ("Invalid dest_path: %s",e)
+            error (_("Invalid dest_path: %s"),e)
         
         for path in args:
             abspath = os.path.normpath(os.path.join(os.path.expanduser(source_path), path))
             if not os.path.exists(abspath):
-                warning("The path given in arg doesn't exist or is not accessible: %s",abspath)
+                warning(_("The path given in arg doesn't exist or is not accessible: %s") % abspath)
             else:
                 if os.path.isdir(abspath):
                     full_dest_path = dest_path if os.path.isabs(path) else os.path.normpath(os.path.join(dest_path, path))
                     if not options.recursive:
-                        warning ('omitting directory "%s"' % abspath)
+                        warning (_('omitting directory "%s"') % abspath)
                     else:
                         self.__appendDirToList(abspath, full_dest_path, options)
                 else:
@@ -217,14 +223,14 @@ class GCP():
             assert(filename)
             dest_file = os.path.join(dest_path,filename)
             if os.path.exists(dest_file) and not options.force:
-                warning ("File [%s] already exists, skipping it !" % dest_file)
+                warning (_("File [%s] already exists, skipping it !") % dest_file)
                 return True
             dest_fd = open(dest_file, 'wb')
                 
             gobject.io_add_watch(source_fd,gobject.IO_IN,self._copyFile,
                                  (dest_fd, options), priority=gobject.PRIORITY_HIGH)
             if not self.progress:
-                info("COPYING %(source)s ==> %(dest)s" % {"source":source_path,"dest":dest_file})
+                info(_("COPYING %(source)s ==> %(dest)s") % {"source":source_path,"dest":dest_file})
             return True
         else:
             #Nothing left to copy, we quit
@@ -275,7 +281,7 @@ class GCP():
             if self.pbar.maxval != self.bytes_total:
                 self.pbar.maxval = self.bytes_total
         except AttributeError:
-            self.pbar = ProgressBar(self.bytes_total,["Progress: ",Percentage()," ",Bar()," ",FileTransferSpeed()," ",ETA()])
+            self.pbar = ProgressBar(self.bytes_total,[_("Progress: "),Percentage()," ",Bar()," ",FileTransferSpeed()," ",ETA()])
             self.pbar.start()
         self.pbar.update(self.bytes_copied)
 
@@ -306,27 +312,27 @@ class GCP():
         parser = OptionParser(usage=_usage,version=ABOUT)
 
         parser.add_option("-r", "--recursive", action="store_true", default=False,
-                    help="copy directories recursively")
+                    help=_("copy directories recursively"))
         
         parser.add_option("-f", "--force", action="store_true", default=False,
-                    help="force overwriting of existing files")
+                    help=_("force overwriting of existing files"))
 
         parser.add_option("--preserve", action="store", default='mode,ownership,timestamps',
-                    help="preserve  the  specified  attributes")
+                    help=_("preserve  the  specified  attributes"))
         
         parser.add_option("--no-unicode-fix", action="store_true", default=False,
-                    help="don't fixe name encoding errors") #TODO
+                    help=_("don't fixe name encoding errors")) #TODO
         
         parser.add_option("--no-progress", action="store_false", dest="progress", default=True,
-                    help="deactivate progress bar")
+                    help=_("deactivate progress bar"))
         
         parser.add_option("-v", "--verbose", action="store_true", default=False,
-                    help="Show what is currently done")
+                    help=_("Show what is currently done"))
         
         (options, args) = parser.parse_args(full_args)
         #options check
         if options.progress and not pbar_available:
-            warning ("Progress bar is not available, deactivating")
+            warning (_("Progress bar is not available, deactivating"))
             options.progress = self.progress = False
         else:
             self.progress = options.progress
@@ -336,7 +342,7 @@ class GCP():
 
         preserve = set(options.preserve.split(','))
         if not preserve.issubset(const_PRESERVE):
-            error ('Invalide --preserve value\nvalid values are:')
+            error (_("Invalide --preserve value\nvalid values are:"))
             for value in const_PRESERVE:
                 error('- %s' % value)
             exit(2)
@@ -345,15 +351,15 @@ class GCP():
         
         #if there is an other instance of gcp, we send options to it
         if not self._main_instance:
-            info ("There is already one instance of %s running, pluging to it" % NAME_SHORT)
+            info (_("There is already one instance of %s running, pluging to it") % NAME_SHORT)
             #XXX: we have to serialize data as dbus only accept valid unicode, and filenames
             #     can have invalid unicode.
             return self.gcp_main.addArgs(os.getcwd(),pickle.dumps(full_args))
         else:
             if len(args) < 2:
-                _error_msg = "Wrong number of arguments"
+                _error_msg = _("Wrong number of arguments")
                 return (False, _error_msg)
-            debug("adding args to gcp: %s",args)
+            debug(_("adding args to gcp: %s"),args)
             self.__checkArgs(options, source_path, args)
             gobject.idle_add(self.__copyNextFile)
         return (True,'')
@@ -364,7 +370,7 @@ class GCP():
         try:
             self.loop.run()
         except KeyboardInterrupt:
-            info("User interruption: good bye")
+            info(_("User interruption: good bye"))
 
 
 if __name__ == "__main__":
