@@ -130,15 +130,16 @@ class GCP():
 
         self.copy_list = []
         self.mounts = self.__getMountPoints()
-        self.files_left = 0
         self.bytes_total = 0
         self.bytes_copied = 0
 
     def getFsType(self, path):
-        fs=''
+        fs = ''
+        last_mount_point = ''
         for mount in self.mounts:
-            if path.startswith(mount) and len(self.mounts[mount])>=len(fs):
+            if path.startswith(mount) and len(mount)>=len(last_mount_point):
                 fs = self.mounts[mount]
+                last_mount_point = mount
         return fs
 
     def __getMountPoints(self):
@@ -159,12 +160,11 @@ class GCP():
         """Add a file to the copy list
         @param path: absolute path of file
         @param options: options as return by optparse"""
-        debug (_("Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)") % {"path":path,
-                                                                                     "dest_path":dest_path,
-                                                                                     "fs_type":self.getFsType(dest_path)}              )
+        debug ("Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)" % {"path":path,
+                                                                                  "dest_path":dest_path,
+                                                                                   "fs_type":self.getFsType(dest_path)}              )
         try:
             self.bytes_total+=os.path.getsize(path)
-            self.files_left+=1
             self.copy_list.insert(0,(path, dest_path, options))
         except OSError,e:
             error(_("Can't copy %(path)s: %(exception)s") % {'path':path, 'exception':e.strerror})
@@ -175,6 +175,7 @@ class GCP():
         @param path: absolute path of dir
         @param options: options as return by optparse"""
         #We first check that the dest path exists, and create it if needed
+        dest_path = self.__filename_fix(dest_path, options)
         if not os.path.exists(dest_path):
             debug (_("Creating directory %s") % dest_path)
             os.makedirs(dest_path) #TODO: check permissions
@@ -221,7 +222,7 @@ class GCP():
             source_fd = open(source_file, 'rb')
             filename = os.path.basename(source_file)
             assert(filename)
-            dest_file = os.path.join(dest_path,filename)
+            dest_file = self.__filename_fix(os.path.join(dest_path,filename),options)
             if os.path.exists(dest_file) and not options.force:
                 warning (_("File [%s] already exists, skipping it !") % dest_file)
                 return True
@@ -254,10 +255,20 @@ class GCP():
             source_fd.close()
             dest_fd.close()
             self.__post_copy(source_fd.name, dest_fd.name, options)
-            self.files_left -= 1
-            assert (self.files_left >= 0)
             return False
         return True
+
+    def __filename_fix(self, filename, options):
+        if self.getFsType(filename) == 'vfat' and options.fs_fix:
+            filename = filename.replace('\\','_')\
+                               .replace(':',';')\
+                               .replace('*','+')\
+                               .replace('?','')\
+                               .replace('"','\'')\
+                               .replace('<','[')\
+                               .replace('>',']')\
+                               .replace('|','!')
+        return filename
 
     def __post_copy(self, source_file, dest_file, options):
         """Do post copy traitement (mainly managing --preserve option)"""
@@ -281,6 +292,9 @@ class GCP():
             if self.pbar.maxval != self.bytes_total:
                 self.pbar.maxval = self.bytes_total
         except AttributeError:
+            if not self.bytes_total:
+                #No progress bar if the files have a null size
+                return
             self.pbar = ProgressBar(self.bytes_total,[_("Progress: "),Percentage()," ",Bar()," ",FileTransferSpeed()," ",ETA()])
             self.pbar.start()
         self.pbar.update(self.bytes_copied)
@@ -320,9 +334,12 @@ class GCP():
         parser.add_option("--preserve", action="store", default='mode,ownership,timestamps',
                     help=_("preserve  the  specified  attributes"))
         
-        parser.add_option("--no-unicode-fix", action="store_true", default=False,
+        parser.add_option("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
                     help=_("don't fixe name encoding errors")) #TODO
-        
+
+        parser.add_option("--no-fs-fix", action="store_false", dest='fs_fix', default=True,
+                    help=_("don't fixe filesystem name incompatibily")) #TODO
+
         parser.add_option("--no-progress", action="store_false", dest="progress", default=True,
                     help=_("deactivate progress bar"))
         
