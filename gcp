@@ -31,7 +31,7 @@ gettext.install('gcp', "i18n", unicode=True)
 
 import sys
 import os,os.path
-from optparse import OptionParser #To be replaced by argparse ASAP
+from optparse import OptionParser, OptionGroup #To be replaced by argparse ASAP
 import cPickle as pickle
 try:
     import gobject
@@ -416,6 +416,61 @@ class GCP():
         except AttributeError:
             pass
 
+    def __sourcesSaving(self,options,args):
+        """Manage saving/loading/deleting etc of sources files
+        @param options: options as parsed from command line
+        @param args: args parsed from command line"""
+        if options.sources_save or options.sources_load\
+           or options.sources_list or options.sources_full_list\
+           or options.sources_del:
+            try:
+                with open(os.path.expanduser(const_SAVED_LIST),'r') as saved_fd:
+                    saved_files = pickle.load(saved_fd)
+            except:
+                saved_files={}
+
+        if options.sources_del:
+            if not saved_files.has_key(options.sources_del):
+                error(_("No saved sources with this name, check existing names with --sources-list"))
+            else:
+                del saved_files[options.sources_del]
+                with open(os.path.expanduser(const_SAVED_LIST),'w') as saved_fd:
+                    pickle.dump(saved_files,saved_fd)
+            if not args:
+                exit(0)
+
+
+        if options.sources_list or options.sources_full_list:
+            info(_('Saved sources:'))
+            sources = saved_files.keys()
+            sources.sort()
+            for source in sources:
+                info("\t[%s]" % source)
+                if options.sources_full_list:
+                    for filename in saved_files[source]:
+                        info("\t\t%s" % filename)
+            info("---\n")
+            if not args:
+                exit(0)
+
+        if options.sources_save or options.sources_replace:
+            if saved_files.has_key(options.sources_save) and not options.sources_replace:
+                error(_("There is already a saved sources with this name, skipping --sources-save")) 
+            else:
+                if len(args)>1:
+                    saved_files[options.sources_save] = map(os.path.abspath,args[:-1])
+                    with open(os.path.expanduser(const_SAVED_LIST),'w') as saved_fd:
+                        pickle.dump(saved_files,saved_fd)
+
+        if options.sources_load:
+            if not saved_files.has_key(options.sources_load):
+                error(_("No saved sources with this name, check existing names with --sources-list"))
+            else:
+                saved_args = saved_files[options.sources_load]
+                saved_args.reverse()
+                for arg in saved_args:
+                    args.insert(0,arg)
+
     def parseArguments(self, full_args=sys.argv[1:], source_path = os.getcwd()):
         """Parse arguments and add files to queue
         @param full_args: list of arguments strings (without program name)
@@ -442,21 +497,6 @@ class GCP():
 
         parser.add_option("--preserve", action="store", default='mode,ownership,timestamps',
                     help=_("preserve  the  specified  attributes"))
-
-        parser.add_option("--save", action="store",
-                    help=_("Save source arguments"))
-
-        parser.add_option("--force-save", action="store",
-                    help=_("Save source arguments and replace memory if it already exists"))
-
-        parser.add_option("--load", action="store",
-                    help=_("Load source arguments"))
-        
-        parser.add_option("--list", action="store_true", default=False,
-                    help=_("List names of saved sources"))
-        
-        parser.add_option("--full-list", action="store_true", default=False,
-                    help=_("List names of saved sources and files in it"))
         
         parser.add_option("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
                     help=_("don't fixe name encoding errors")) #TODO
@@ -469,6 +509,29 @@ class GCP():
         
         parser.add_option("-v", "--verbose", action="store_true", default=False,
                     help=_("Show what is currently done"))
+
+        group_saving = OptionGroup(parser, "sources saving")
+        
+        group_saving.add_option("--sources-save", action="store",
+                    help=_("Save source arguments"))
+
+        group_saving.add_option("--sources-replace", action="store",
+                    help=_("Save source arguments and replace memory if it already exists"))
+
+        group_saving.add_option("--sources-load", action="store",
+                    help=_("Load source arguments"))
+        
+        group_saving.add_option("--sources-del", action="store",
+                    help=_("delete saved sources"))
+        
+        group_saving.add_option("--sources-list", action="store_true", default=False,
+                    help=_("List names of saved sources"))
+        
+        group_saving.add_option("--sources-full-list", action="store_true", default=False,
+                    help=_("List names of saved sources and files in it"))
+
+        parser.add_option_group(group_saving)
+
         
         (options, args) = parser.parse_args(full_args)
         #options check
@@ -490,40 +553,7 @@ class GCP():
         else:
             options.preserve = preserve
 
-        if options.save or options.load or options.list or options.full_list:
-            try:
-                with open(os.path.expanduser(const_SAVED_LIST),'r') as saved_fd:
-                    saved_files = pickle.load(saved_fd)
-            except:
-                saved_files={}
-
-        if options.list or options.full_list:
-            info(_('Saved sources:'))
-            sources = saved_files.keys()
-            sources.sort()
-            for source in sources:
-                info("\t[%s]" % source)
-                if options.full_list:
-                    for filename in saved_files[source]:
-                        info("\t\t%s" % filename)
-            info("---\n")
-            if not args:
-                exit(0)
-
-        if options.save or options.force_save:
-            if saved_files.has_key(options.save) and not options.force_save:
-                error(_("There is already a saved sources with this name, skipping --save")) 
-            else:
-                if len(args)>1:
-                    saved_files[options.save] = map(os.path.abspath,args[:-1])
-                    with open(os.path.expanduser(const_SAVED_LIST),'w') as saved_fd:
-                        pickle.dump(saved_files,saved_fd)
-
-        if options.load:
-            if not saved_files.has_key(options.load):
-                error(_("No saved sources with this name, check existing names with --list"))
-            else:
-                args = saved_files[options.load] + args
+        self.__sourcesSaving(options, args)
         
         #if there is an other instance of gcp, we send options to it
         if not self._main_instance:
