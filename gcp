@@ -300,31 +300,38 @@ class GCP():
         @param source_fd: file descriptor of the file to copy
         @param condition: condition which launched the callback (glib.IO_IN)
         @param data: tuple with (destination file descriptor, copying options)"""
-        dest_fd,options = data
-
         try:
-            buff = source_fd.read(self.buffer_size)
-        except:
-            self.__copyFailed("can't read source", source_fd, dest_fd)
-            return False
+            dest_fd,options = data
 
-        try:
-            dest_fd.write(buff)
-        except:
-            self.__copyFailed("can't write to dest", source_fd, dest_fd)
-            return False
+            try:
+                buff = source_fd.read(self.buffer_size)
+            except KeyboardInterrupt:
+                raise KeyboardInterrupt
+            except:
+                self.__copyFailed("can't read source", source_fd, dest_fd)
+                return False
 
-        self.bytes_copied += len(buff)
-        if self.progress:
-            self._pbar_update()
+            try:
+                dest_fd.write(buff)
+            except KeyboardInterrupt:
+                raise KeyboardInterrupt
+            except:
+                self.__copyFailed("can't write to dest", source_fd, dest_fd)
+                return False
 
-        if len(buff) != self.buffer_size:
-            source_fd.close()
-            dest_fd.close()
-            self.__post_copy(source_fd.name, dest_fd.name, options)
-            self.journal.closeFile()
-            return False
-        return True
+            self.bytes_copied += len(buff)
+            if self.progress:
+                self._pbar_update()
+
+            if len(buff) != self.buffer_size:
+                source_fd.close()
+                dest_fd.close()
+                self.__post_copy(source_fd.name, dest_fd.name, options)
+                self.journal.closeFile()
+                return False
+            return True
+        except KeyboardInterrupt:
+            self._userInterruption()
 
     def __filename_fix(self, filename, options, no_journal=False):
         """Fix filenames incompatibilities/mistake according to options
@@ -481,13 +488,17 @@ class GCP():
                 self.__launched = True
         return (True,'')
 
+    def _userInterruption(self):
+        info(_("User interruption: good bye"))
+        exit(1)
+
     def go(self):
         """Launch main loop"""
         self.loop = gobject.MainLoop()
         try:
             self.loop.run()
         except KeyboardInterrupt:
-            info(_("User interruption: good bye"))
+            self._userInterruption()
 
 
 if __name__ == "__main__":
