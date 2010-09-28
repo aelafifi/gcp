@@ -154,6 +154,7 @@ class GCP():
                 debug (_("gcp launched"))
                 self._main_instance = True
                 self.buffer_size = const_BUFF_SIZE
+                self.__launched = False #True when journal is initialised and copy is started
             else:
                 raise e
 
@@ -474,8 +475,10 @@ class GCP():
                 return (False, _error_msg)
             debug(_("adding args to gcp: %s") % str(args).decode('utf-8','replace'))
             self.__checkArgs(options, source_path, args)
-            self.journal = Journal()
-            gobject.idle_add(self.__copyNextFile)
+            if not self.__launched:
+                self.journal = Journal()
+                gobject.idle_add(self.__copyNextFile)
+                self.__launched = True
         return (True,'')
 
     def go(self):
