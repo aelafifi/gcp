@@ -101,7 +101,7 @@ class DbusObject(dbus.service.Object):
             args = pickle.loads(str(args))
         except TypeError, pickle.UnpicklingError:
             return (False, _("INTERNAL ERROR: invalid arguments"))
-        return self._gcp.parseArguments(args, source_path)
+        return self._gcp.parseArguments(args, str(source_path))
 
 class Journal():
     def __init__(self, path=const_JOURNAL_PATH):
@@ -315,7 +315,7 @@ class GCP():
 
         self.bytes_copied += len(buff)
         if self.progress:
-            self.__pbar_update()
+            self._pbar_update()
 
         if len(buff) != self.buffer_size:
             source_fd.close()
@@ -364,17 +364,34 @@ class GCP():
             except OSError,e:
                 self.journal.error("preserve-"+preserve)
 
-    def __pbar_update(self):
+    def __get_string_size(self, size):
+        """Return a nice string representation of a size"""
+
+        if size>=2**50:
+            return _("%.2f PiB") % (float(size)/2**50)
+        elif size>=2**40:
+            return _("%.2f TiB") % (float(size)/2**40)
+        elif size>=2**30:
+            return _("%.2f GiB") % (float(size)/2**30)
+        elif size>=2**20:
+            return _("%.2f MiB") % (float(size)/2**20)
+        elif size>=2**10:
+            return _("%.2f KiB") % (float(size)/2**10)
+        else:
+            return _("%i B") % size
+
+    def _pbar_update(self):
         """Update progress bar position, create the bar if it doesn't exist"""
         assert(self.progress)
         try:
             if self.pbar.maxval != self.bytes_total:
                 self.pbar.maxval = self.bytes_total
+                self.pbar.widgets[0] = _("Copying %s") % self.__get_string_size(self.bytes_total)
         except AttributeError:
             if not self.bytes_total:
                 #No progress bar if the files have a null size
                 return
-            self.pbar = ProgressBar(self.bytes_total,[_("Progress: "),Percentage()," ",Bar()," ",FileTransferSpeed()," ",ETA()])
+            self.pbar = ProgressBar(self.bytes_total,[_("Copying %s") % self.__get_string_size(self.bytes_total),Percentage()," ",Bar()," ",FileTransferSpeed()," ",ETA()])
             self.pbar.start()
         self.pbar.update(self.bytes_copied)
 
