@@ -422,7 +422,7 @@ class GCP():
         @param args: args parsed from command line"""
         if options.sources_save or options.sources_load\
            or options.sources_list or options.sources_full_list\
-           or options.sources_del:
+           or options.sources_del or options.sources_replace:
             try:
                 with open(os.path.expanduser(const_SAVED_LIST),'r') as saved_fd:
                     saved_files = pickle.load(saved_fd)
