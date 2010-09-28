@@ -195,14 +195,14 @@ class GCP():
         """Add a file to the copy list
         @param path: absolute path of file
         @param options: options as return by optparse"""
-        debug ("Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)" % {"path":path,
-                                                                                  "dest_path":dest_path,
+        debug (_("Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)") % {"path":path.decode('utf-8','replace'),
+                                                                                  "dest_path":dest_path.decode('utf-8','replace'),
                                                                                    "fs_type":self.getFsType(dest_path)}              )
         try:
             self.bytes_total+=os.path.getsize(path)
             self.copy_list.insert(0,(path, dest_path, options))
         except OSError,e:
-            error(_("Can't copy %(path)s: %(exception)s") % {'path':path, 'exception':e.strerror})
+            error(_("Can't copy %(path)s: %(exception)s") % {'path':path.decode('utf-8','replace'), 'exception':e.strerror})
 
 
     def __appendDirToList(self, dirpath, dest_path, options):
@@ -210,9 +210,9 @@ class GCP():
         @param path: absolute path of dir
         @param options: options as return by optparse"""
         #We first check that the dest path exists, and create it if needed
-        dest_path = self.__filename_fix(dest_path, options)
+        dest_path = self.__filename_fix(dest_path, options, no_journal=True)
         if not os.path.exists(dest_path):
-            debug (_("Creating directory %s") % dest_path)
+            debug ("Creating directory %s" % dest_path)
             os.makedirs(dest_path) #TODO: check permissions
         #TODO: check that dest_path is an accessible dir,
         #      and skip file/write error in log if needed
@@ -225,7 +225,8 @@ class GCP():
                 else:
                     self.__appendToList(filepath, dest_path, options)
         except OSError,e:
-            error(_("Can't copy %(path)s: %(exception)s") % {'path':dirpath, 'exception':e.strerror})
+            error(_("Can't append %(path)s to copy list: %(exception)s") % {'path':filepath.decode('utf-8','replace'),
+                                                             'exception':e.strerror})
 
     def __checkArgs(self, options, source_path, args):
         """Check thats args are files, and add them to copy list"""
@@ -274,7 +275,8 @@ class GCP():
             gobject.io_add_watch(source_fd,gobject.IO_IN,self._copyFile,
                                  (dest_fd, options), priority=gobject.PRIORITY_HIGH)
             if not self.progress:
-                info(_("COPYING %(source)s ==> %(dest)s") % {"source":source_path,"dest":dest_file})
+                info(_("COPYING %(source)s ==> %(dest)s") % {"source":source_path.decode('utf-8','replace'),
+                                                             "dest":dest_file.decode('utf-8','replace')})
             return True
         else:
             #Nothing left to copy, we quit
@@ -323,10 +325,11 @@ class GCP():
             return False
         return True
 
-    def __filename_fix(self, filename, options):
+    def __filename_fix(self, filename, options, no_journal=False):
         """Fix filenames incompatibilities/mistake according to options
         @param filename: full path to the file
         @param options: options as parsed on command line
+        @param no_journal: don't write any entry in journal
         @return: fixed filename"""
         fixed_filename = filename
 
@@ -334,13 +337,16 @@ class GCP():
             fixed_filename = filename.replace('\\','_')\
                                .replace(':',';')\
                                .replace('*','+')\
-                               .replace('?','')\
+                               .replace('?','_')\
                                .replace('"','\'')\
                                .replace('<','[')\
                                .replace('>',']')\
-                               .replace('|','!')
+                               .replace('|','!')\
+                               .rstrip() #XXX: suffixed spaces cause issues (must check FAT doc for why)
 
-        if fixed_filename != filename:
+        if not fixed_filename:
+            fixed_filename = '_'
+        if fixed_filename != filename and not no_journal:
             self.journal.error('filename fixed')
         return fixed_filename
 
@@ -449,7 +455,7 @@ class GCP():
             if len(args) < 2:
                 _error_msg = _("Wrong number of arguments")
                 return (False, _error_msg)
-            debug(_("adding args to gcp: %s"),args)
+            debug(_("adding args to gcp: %s") % str(args).decode('utf-8','replace'))
             self.__checkArgs(options, source_path, args)
             self.journal = Journal()
             gobject.idle_add(self.__copyNextFile)
