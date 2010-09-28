@@ -498,8 +498,8 @@ class GCP():
         parser.add_option("--preserve", action="store", default='mode,ownership,timestamps',
                     help=_("preserve  the  specified  attributes"))
         
-        parser.add_option("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
-                    help=_("don't fixe name encoding errors")) #TODO
+        #parser.add_option("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
+        #            help=_("don't fixe name encoding errors")) #TODO
 
         parser.add_option("--no-fs-fix", action="store_false", dest='fs_fix', default=True,
                     help=_("don't fixe filesystem name incompatibily"))
