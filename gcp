@@ -267,7 +267,7 @@ class GCP():
             assert(filename)
             dest_file = self.__filename_fix(os.path.join(dest_path,filename),options)
             if os.path.exists(dest_file) and not options.force:
-                warning (_("File [%s] already exists, skipping it !") % dest_file)
+                warning (_("File [%s] already exists, skipping it !") % dest_file.decode('utf-8','replace'))
                 return True
             try:
                 dest_fd = open(dest_file, 'wb')
@@ -404,7 +404,7 @@ class GCP():
             if not self.bytes_total:
                 #No progress bar if the files have a null size
                 return
-            self.pbar = ProgressBar(self.bytes_total,[_("Copying %s") % self.__get_string_size(self.bytes_total),Percentage()," ",Bar()," ",FileTransferSpeed()," ",ETA()])
+            self.pbar = ProgressBar(self.bytes_total,[_("Copying %s") % self.__get_string_size(self.bytes_total)," ",Percentage()," ",Bar()," ",FileTransferSpeed()," ",ETA()])
             self.pbar.start()
         self.pbar.update(self.bytes_copied)
 
