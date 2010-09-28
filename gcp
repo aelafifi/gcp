@@ -274,7 +274,7 @@ class GCP():
                 return True
                 
             gobject.io_add_watch(source_fd,gobject.IO_IN,self._copyFile,
-                                 (dest_fd, options), priority=gobject.PRIORITY_HIGH)
+                                 (dest_fd, options), priority=gobject.PRIORITY_DEFAULT)
             if not self.progress:
                 info(_("COPYING %(source)s ==> %(dest)s") % {"source":source_path.decode('utf-8','replace'),
                                                              "dest":dest_file.decode('utf-8','replace')})
