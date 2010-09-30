@@ -103,12 +103,17 @@ class DbusObject(dbus.service.Object):
             args = pickle.loads(str(args))
         except TypeError, pickle.UnpicklingError:
             return (False, _("INTERNAL ERROR: invalid arguments"))
-        return self._gcp.parseArguments(args, str(source_path))
+        try:
+            source_path = pickle.loads(str(source_path))
+        except TypeError, pickle.UnpicklingError:
+            return (False, _("INTERNAL ERROR: invalid source_path"))
+        return self._gcp.parseArguments(args, source_path)
 
 class Journal():
     def __init__(self, path=const_JOURNAL_PATH):
         self.journal_path = os.path.expanduser(path)
         self.journal_fd = open(self.journal_path,'w') #TODO: check and maybe save previous journals
+        self.__entry_open = False
 
     def __del__(self):
         self.journal_fd.flush()
@@ -116,6 +121,8 @@ class Journal():
 
     def startFile(self, source_path):
         """Start an entry in the journal"""
+        assert not self.__entry_open
+        self.__entry_open = True
         self.journal_fd.write(source_path+"\n")
         self.journal_fd.flush()
         self.success=True
@@ -123,19 +130,23 @@ class Journal():
 
     def closeFile(self):
         """Close the entry in the journal"""
+        assert self.__entry_open
         if not self.success:
             status = "FAILED"
         else:
             status = "OK" if not self.errors else "PARTIAL"
         self.journal_fd.write("%(status)s: %(errors)s\n" % {'status': status, 'errors': ', '.join(self.errors)})
         self.journal_fd.flush()
+        self.__entry_open = False
 
     def copyFailed(self):
         """Must be called when something is wrong with the copy itself"""
+        assert self.__entry_open
         self.success = False
 
     def error(self, name):
         """Something went wrong"""
+        assert self.__entry_open
         self.errors.append(name)
         
 
@@ -499,10 +510,10 @@ class GCP():
                     help=_("preserve  the  specified  attributes"))
         
         #parser.add_option("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
-        #            help=_("don't fixe name encoding errors")) #TODO
+        #            help=_("don't fix name encoding errors")) #TODO
 
         parser.add_option("--no-fs-fix", action="store_false", dest='fs_fix', default=True,
-                    help=_("don't fixe filesystem name incompatibily"))
+                    help=_("don't fix filesystem name incompatibily"))
 
         parser.add_option("--no-progress", action="store_false", dest="progress", default=True,
                     help=_("deactivate progress bar"))
@@ -560,7 +571,7 @@ class GCP():
             info (_("There is already one instance of %s running, pluging to it") % NAME_SHORT)
             #XXX: we have to serialize data as dbus only accept valid unicode, and filenames
             #     can have invalid unicode.
-            return self.gcp_main.addArgs(os.getcwd(),pickle.dumps(full_args))
+            return self.gcp_main.addArgs(pickle.dumps(os.getcwd()),pickle.dumps(full_args))
         else:
             if len(args) < 2:
                 _error_msg = _("Wrong number of arguments")

@@ -25,7 +25,7 @@ along with gcp.  If not, see <http://www.gnu.org/licenses/>.
 gcp is a file copier, loosely inspired from cp, but with high level functionalities like:
 	- progression indicator
 	- gcp continue copying even when there is an issue: he just skip the file with problem, and go on
-	- journalization: gcp write what he is doing, this allow to know which files where effectively copied
+	- journalization: gcp write what he is doing, this allow to know which files were effectively copied
 	- fixing names to be compatible with the target filesystem (e.g. removing incompatible chars like "?" or "*" on vfat)
 	- if you launch a copy when an other is already running, the files are added to the first queue, this avoid your hard drive to move its read/write head all the time
 	- files saving: you can keep track of files you have copied, and re-copy them later (useful when, for example, you always copy some free music to all your friends).
