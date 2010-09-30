@@ -1,0 +1,8 @@
+gcp 0.1.1 (30/09/10):
+	- double entry check in journal
+	- unicode source_path send via dbus (second instance of gcp) fixed
+	- errors are now shown after copy
+	- fixed bad closure when a file already exists
+	- added "gcp SOURCE_FILE DEST_FILE" syntax management 
+gcp 0.1 (29/09/10):
+	**INITIAL PUBLIC RELEASE**
