@@ -4,5 +4,5 @@ gcp 0.1.1 (30/09/10):
 	- errors are now shown after copy
 	- fixed bad closure when a file already exists
 	- added "gcp SOURCE_FILE DEST_FILE" syntax management 
-gcp 0.1 (29/09/10):
+gcp 0.1 (28/09/10):
 	**INITIAL PUBLIC RELEASE**
