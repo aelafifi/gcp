@@ -308,6 +308,10 @@ class GCP():
             dest_file = self.__filename_fix(os.path.join(dest_path,filename),options)
             if os.path.exists(dest_file) and not options.force:
                 warning (_("File [%s] already exists, skipping it !") % dest_file.decode('utf-8','replace'))
+                self.journal.copyFailed()
+                self.journal.error("already exists")
+                self.journal.closeFile()
+                source_fd.close()
                 return True
             try:
                 dest_fd = open(dest_file, 'wb')
@@ -321,7 +325,7 @@ class GCP():
             gobject.io_add_watch(source_fd,gobject.IO_IN,self._copyFile,
                                  (dest_fd, options), priority=gobject.PRIORITY_DEFAULT)
             if not self.progress:
-                info(_("COPYING %(source)s ==> %(dest)s") % {"source":source_path.decode('utf-8','replace'),
+                info(_("COPYING %(source)s ==> %(dest)s") % {"source":source_file.decode('utf-8','replace'),
                                                              "dest":dest_file.decode('utf-8','replace')})
             return True
         else:
