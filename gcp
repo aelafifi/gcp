@@ -76,6 +76,11 @@ const_FILES_DIR = "~/.gcp"
 const_JOURNAL_PATH = const_FILES_DIR + "/journal"
 const_SAVED_LIST = const_FILES_DIR + "/saved_list"
 
+COLOR_RED = "\033[00;31m"
+COLOR_END = '\033[0m'
+
+
+
 
 class DbusObject(dbus.service.Object):
 
@@ -113,7 +118,9 @@ class Journal():
     def __init__(self, path=const_JOURNAL_PATH):
         self.journal_path = os.path.expanduser(path)
         self.journal_fd = open(self.journal_path,'w') #TODO: check and maybe save previous journals
-        self.__entry_open = False
+        self.__entry_open = None
+        self.failed = []
+        self.partial = []
 
     def __del__(self):
         self.journal_fd.flush()
@@ -122,7 +129,7 @@ class Journal():
     def startFile(self, source_path):
         """Start an entry in the journal"""
         assert not self.__entry_open
-        self.__entry_open = True
+        self.__entry_open = source_path
         self.journal_fd.write(source_path+"\n")
         self.journal_fd.flush()
         self.success=True
@@ -137,18 +144,44 @@ class Journal():
             status = "OK" if not self.errors else "PARTIAL"
         self.journal_fd.write("%(status)s: %(errors)s\n" % {'status': status, 'errors': ', '.join(self.errors)})
         self.journal_fd.flush()
-        self.__entry_open = False
+        self.__entry_open = None
 
     def copyFailed(self):
         """Must be called when something is wrong with the copy itself"""
         assert self.__entry_open
         self.success = False
+        self.failed.append(self.__entry_open)
 
     def error(self, name):
         """Something went wrong"""
         assert self.__entry_open
         self.errors.append(name)
-        
+        self.partial.append(self.__entry_open)
+
+    def showErrors(self):
+        """Show which files were not successfully copied"""
+        failed = set(self.failed)
+        partial = set(self.partial)
+        for entry in failed:
+            partial.discard(entry)
+
+        if failed:
+            error(_(COLOR_RED+"/!\\ THE FOLLOWING FILES WERE NOT SUCCESSFULY COPIED:" + COLOR_END))
+            #TODO: use logging capability to print all error message in read instead of COLOR_RED
+            for entry in failed:
+                info("\t- %s" % entry)
+            info ('--\n')
+        if partial:
+            warning(_("The following files were copied, but some errors happened:"))
+            for entry in partial:
+                info("\t- %s" % entry)
+            info ('--\n')
+
+        if failed or partial:
+            info(_("Please check journal: %s") % self.journal_path)
+
+
+
 
 class GCP():
 
@@ -299,6 +332,7 @@ class GCP():
             #Nothing left to copy, we quit
             if self.progress:
                 self.__pbar_finish()
+            self.journal.showErrors()
             self.loop.quit()
 
     def __copyFailed(self, reason, source_fd, dest_fd):
