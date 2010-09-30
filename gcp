@@ -76,10 +76,6 @@ const_FILES_DIR = "~/.gcp"
 const_JOURNAL_PATH = const_FILES_DIR + "/journal"
 const_SAVED_LIST = const_FILES_DIR + "/saved_list"
 
-COLOR_RED = "\033[00;31m"
-COLOR_END = '\033[0m'
-
-
 
 
 class DbusObject(dbus.service.Object):
@@ -166,8 +162,8 @@ class Journal():
             partial.discard(entry)
 
         if failed:
-            error(_(COLOR_RED+"/!\\ THE FOLLOWING FILES WERE NOT SUCCESSFULY COPIED:" + COLOR_END))
-            #TODO: use logging capability to print all error message in read instead of COLOR_RED
+            error(_("/!\\ THE FOLLOWING FILES WERE *NOT* SUCCESSFULY COPIED:"))
+            #TODO: use logging capability to print all error message in red
             for entry in failed:
                 info("\t- %s" % entry)
             info ('--\n')
