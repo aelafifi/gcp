@@ -1,5 +1,5 @@
-gcp v0.1.1
-(c) Jérôme Poisson aka Goffi 2010
+gcp v0.1.2
+(c) Jérôme Poisson aka Goffi 2010, 2011
 
 gcp (Goffi's cp) is a files copier.
 
@@ -87,7 +87,8 @@ If I forgot any credit, please contact me (mail below) to fix it.
 ** Contact **
 
 You can contact me at goffi@goffi.org .
-You'll find the latest version on my website: http://www.goffi.org (it's mainly in french, I will probably make a little part in english in the future).
+You'll find the latest version on my ftp: ftp://ftp.goffi.org/gcp, or check the wiki ( http://wiki.goffi.org/wiki/Gcp )
+Please report any bug on http://bugs.goffi.org
 You can also have a look to my other main projects (and maybe to the smaller ones too ;) ):
 - lm (list movie): a tool to list movies using IMdB data, loosely inspired from ls
 - SàT: my main project, a jabber/XMPP client, which is a brick to many others things I have in mind
