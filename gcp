@@ -317,7 +317,6 @@ class GCP():
                 self.journal.copyFailed()
                 self.journal.error("can't open source")
                 self.journal.closeFile()
-                source_fd.close()
                 return True
             filename = os.path.basename(source_file)
             assert(filename)
