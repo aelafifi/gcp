@@ -311,7 +311,14 @@ class GCP():
         if self.copy_list:
             source_file, dest_path, options = self.copy_list.pop()
             self.journal.startFile(source_file)
-            source_fd = open(source_file, 'rb')
+            try:
+                source_fd = open(source_file, 'rb')
+            except:
+                self.journal.copyFailed()
+                self.journal.error("can't open source")
+                self.journal.closeFile()
+                source_fd.close()
+                return True
             filename = os.path.basename(source_file)
             assert(filename)
             dest_file = self.__filename_fix(options.dest_file,options) if options.dest_file else self.__filename_fix(os.path.join(dest_path,filename),options)
