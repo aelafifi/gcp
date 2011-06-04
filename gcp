@@ -3,7 +3,8 @@
 
 """
 gcp: Goffi's CoPier
-Copyright (C) 2010, 2011  Jérôme Poisson (goffi@goffi.org)
+Copyright (C) 2010, 2011  Jérôme Poisson <goffi@goffi.org>
+          (c) 2011        Thomas Preud'homme <thomas.preudhomme@celest.fr>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -410,15 +411,15 @@ class GCP():
 
     def __post_copy(self, source_file, dest_file, options):
         """Do post copy traitement (mainly managing --preserve option)"""
-        st_mode, st_ino, st_dev, st_nlink, st_uid, st_gid, st_size, st_atime, st_mtime, st_ctime = os.stat(source_file)
+        st_file = os.stat(source_file)
         for preserve in options.preserve:
             try:
                 if preserve == 'mode':
-                    os.chmod(dest_file, st_mode)
+                    os.chmod(dest_file, st_file.st_mode)
                 elif preserve == 'ownership':
-                    os.chown(dest_file, st_uid, st_gid)
+                    os.chown(dest_file, st_file.st_uid, st_file.st_gid)
                 elif preserve == 'timestamps':
-                    os.utime(dest_file, (st_atime, st_mtime))
+                    os.utime(dest_file, (st_file.st_atime, st_file.st_mtime))
             except OSError,e:
                 self.journal.error("preserve-"+preserve)
 
