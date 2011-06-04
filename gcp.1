@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH GCP 1 "November 22, 2010"
+.TH GCP 1 "June 04, 2011"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -59,6 +59,12 @@ Show summary of options.
 .TP
 .B \-r, \-\-recursive
 Copy directories recursively.
+.TP
+.B \-L, \-\-dereference
+always follow symbolic links in sources
+.TP
+.B \-P, \-\-no\-dereference
+never follow symbolic links in sources
 .TP
 .B \-f, \-\-force
 Overwrite existing files.
