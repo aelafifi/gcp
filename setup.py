@@ -26,7 +26,7 @@ setup(name=name,
                    'Topic :: Utilities'
                    ],
       data_files=[(path.join(sys.prefix,'share/locale/fr/LC_MESSAGES'), ['i18n/fr/LC_MESSAGES/gcp.mo']),
-                  ('share/doc/%s/examples' % name, glob("examples/*.py")),
-                  ('share/doc/%s' % name, ['COPYING','COPYING.LESSER','README'])],
+                  ('share/man/man1', ["gcp.1"]),
+                  ('share/doc/%s' % name, ['COPYING','README'])],
       scripts=['gcp'],
      )
