@@ -266,6 +266,9 @@ class GCP():
         try:
             for filename in os.listdir(dirpath):
                 filepath = os.path.join(dirpath,filename)
+                if os.path.islink(filepath) and not options.dereference:
+                    debug ("Skippink symbolic dir: %s" % filepath.decode('utf-8','replace'))
+                    continue
                 if os.path.isdir(filepath):
                     full_dest_path = os.path.join(dest_path,filename)
                     self.__appendDirToList(filepath, full_dest_path, options)
@@ -549,6 +552,12 @@ class GCP():
 
         parser.add_option("--preserve", action="store", default='mode,ownership,timestamps',
                     help=_("preserve  the  specified  attributes"))
+        
+        parser.add_option("-L", "--dereference", action="store_true", default=False,
+                    help=_("always follow symbolic links in sources"))
+        
+        parser.add_option("-P", "--no-dereference", action="store_false", dest='dereference',
+                    help=_("never follow symbolic links in sources"))
         
         #parser.add_option("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
         #            help=_("don't fix name encoding errors")) #TODO
