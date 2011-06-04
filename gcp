@@ -272,7 +272,12 @@ class GCP():
                 else:
                     self.__appendToList(filepath, dest_path, options)
         except OSError,e:
-            error(_("Can't append %(path)s to copy list: %(exception)s") % {'path':filepath.decode('utf-8','replace'),
+            try:
+                error(_("Can't append %(path)s to copy list: %(exception)s") % {'path':filepath.decode('utf-8','replace'),
+                                                             'exception':e.strerror})
+            except NameError:
+                #We can't list the dir
+                error(_("Can't access %(dirpath)s: %(exception)s") % {'dirpath':dirpath.decode('utf-8','replace'),
                                                              'exception':e.strerror})
 
     def __checkArgs(self, options, source_path, args):
