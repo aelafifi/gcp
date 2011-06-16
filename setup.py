@@ -7,7 +7,6 @@ use_setuptools()
 from setuptools import setup
 import sys
 from os import path
-from glob import glob
 
 name = 'gcp'
 

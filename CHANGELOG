@@ -1,3 +1,11 @@
+gcp 0.1.2 (16/06/11):
+	- removed bad fd close
+	- crash fix when source file can't be openned
+	- symbolic link skipping (--dereferrence and --no-dereferrence options)
+	- unaccessible source dir crash fix
+	- os.stat precision fix
+	- manpage
+	- install script 
 gcp 0.1.1 (30/09/10):
 	- double entry check in journal
 	- unicode source_path send via dbus (second instance of gcp) fixed
