@@ -56,7 +56,7 @@ NAME = "gcp (Goffi's copier)"
 NAME_SHORT = "gcp"
 VERSION = '0.1.2'
 
-ABOUT = NAME+u" v"+VERSION+u""" (c) Jérôme Poisson (aka Goffi) 2010
+ABOUT = NAME+u" v"+VERSION+u""" (c) Jérôme Poisson (aka Goffi) 2010, 2011
 
 ---
 """+NAME+u""" Copyright (C) 2010  Jérôme Poisson
@@ -96,9 +96,9 @@ class DbusObject(dbus.service.Object):
 
     @dbus.service.method(const_DBUS_INTERFACE,
                          in_signature='ss', out_signature='bs')
-    def addArgs(self, source_path, args):
+    def addArgs(self, source_dir, args):
         """Add arguments to gcp as if there were entered on its own command line
-        @param source_path: current working dir to use as base for arguments, as given by os.getcwd()
+        @param source_dir: current working dir to use as base for arguments, as given by os.getcwd()
         @param args: serialized (wich pickle) list of strings - without command name -, as given by sys.argv[1:].
         @return: success (boolean) and error message if any (string)"""
         try:
@@ -106,10 +106,10 @@ class DbusObject(dbus.service.Object):
         except TypeError, pickle.UnpicklingError:
             return (False, _("INTERNAL ERROR: invalid arguments"))
         try:
-            source_path = pickle.loads(str(source_path))
+            source_dir = pickle.loads(str(source_dir))
         except TypeError, pickle.UnpicklingError:
-            return (False, _("INTERNAL ERROR: invalid source_path"))
-        return self._gcp.parseArguments(args, source_path)
+            return (False, _("INTERNAL ERROR: invalid source_dir"))
+        return self._gcp.parseArguments(args, source_dir)
 
 class Journal():
     def __init__(self, path=const_JOURNAL_PATH):
@@ -283,24 +283,29 @@ class GCP():
                 error(_("Can't access %(dirpath)s: %(exception)s") % {'dirpath':dirpath.decode('utf-8','replace'),
                                                              'exception':e.strerror})
 
-    def __checkArgs(self, options, source_path, args):
-        """Check thats args are files, and add them to copy list"""
+    def __checkArgs(self, options, source_dir, args):
+        """Check thats args are files, and add them to copy list
+        @param options: options sets
+        @param source_dir: directory where the command was entered
+        @parm args: args of the copy"""
         assert(len (args)>=2)
+        len_args = len(args)
         try:
-            dest_path = os.path.normpath(os.path.join(os.path.expanduser(source_path), args.pop()))
+            dest_path = os.path.normpath(os.path.join(source_dir, args.pop()))
         except OSError,e:
             error (_("Invalid dest_path: %s"),e)
         
         for path in args:
-            abspath = os.path.normpath(os.path.join(os.path.expanduser(source_path), path))
+            abspath = os.path.normpath(os.path.join(os.path.expanduser(source_dir), path))
             if not os.path.exists(abspath):
                 warning(_("The path given in arg doesn't exist or is not accessible: %s") % abspath.decode('utf-8','replace'))
             else:
                 if os.path.isdir(abspath):
-                    full_dest_path = dest_path if os.path.isabs(path) else os.path.normpath(os.path.join(dest_path, path))
                     if not options.recursive:
                         warning (_('omitting directory "%s"') % abspath.decode('utf-8','replace'))
                     else:
+                        _basename=os.path.basename(os.path.normpath(path))
+                        full_dest_path = dest_path if options.directdir else os.path.normpath(os.path.join(dest_path, _basename))
                         self.__appendDirToList(abspath, full_dest_path, options)
                 else:
                     self.__appendToList(abspath, dest_path, options)
@@ -531,10 +536,10 @@ class GCP():
                 for arg in saved_args:
                     args.insert(0,arg)
 
-    def parseArguments(self, full_args=sys.argv[1:], source_path = os.getcwd()):
+    def parseArguments(self, full_args=sys.argv[1:], source_dir = os.getcwd()):
         """Parse arguments and add files to queue
         @param full_args: list of arguments strings (without program name)
-        @param source_path: path from where the arguments come, ad given by os.getcwd()
+        @param source_dir: path from where the arguments come, as given by os.getcwd()
         @return: a tuple (boolean, message) where the boolean is the success of the arguments
                  validation, and message is the error message to print when necessary"""
         _usage="""
@@ -601,6 +606,7 @@ class GCP():
 
         
         (options, args) = parser.parse_args(full_args)
+        options.directdir = False #True only in the special case: we are copying a dir and it doesn't exists
         #options check
         if options.progress and not pbar_available:
             warning (_("Progress bar is not available, deactivating"))
@@ -622,9 +628,14 @@ class GCP():
 
         self.__sourcesSaving(options, args)
 
-        if len(args) == 2:
+        if len(args) == 2: #we check special cases
+            src_path = os.path.abspath(os.path.expanduser(args[0]))
             dest_path = os.path.abspath(os.path.expanduser(args[1]))
-            if not os.path.exists(dest_path) or os.path.isfile(dest_path):
+            if os.path.isdir(src_path):
+                options.dest_file = None #we are copying a dir, this options is for files only
+                if not os.path.exists(dest_path):
+                    options.directdir = True #dest_dir doesn't exist, it's the directdir special case
+            elif not os.path.exists(dest_path) or os.path.isfile(dest_path):
                 options.dest_file = dest_path
                 args[1] = os.path.dirname(dest_path)
             else:
@@ -643,7 +654,7 @@ class GCP():
                 _error_msg = _("Wrong number of arguments")
                 return (False, _error_msg)
             debug(_("adding args to gcp: %s") % str(args).decode('utf-8','replace'))
-            self.__checkArgs(options, source_path, args)
+            self.__checkArgs(options, source_dir, args)
             if not self.__launched:
                 self.journal = Journal()
                 gobject.idle_add(self.__copyNextFile)
