@@ -12,7 +12,7 @@ name = 'gcp'
 
 setup(name=name,
       version='0.1.2',
-      description=u"Goffi's CoPier",
+      description=u"gcp is an advanced copy tool loosely inspired from cp",
       long_description=u'gcp is a command-line tool to copy files, loosely inspired from cp, but with high level functionalities such as progress bar, copy continuation on error, journaling to know which files were successfuly copied, name mangling to workaround filesystem limitations (FAT), unique copy queue, copy list managemet, command arguments close to cp',
       author='Goffi (Jérôme Poisson)',
       author_email='goffi@goffi.org',
