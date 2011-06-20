@@ -1,0 +1,5 @@
+include MANIFEST.in distribute_setup.py gcp.1
+global-include *.py
+global-include *.po *.mo
+global-include CHANGELOG COPYING* INSTALL README*
+global-exclude *.un~ *.swp
