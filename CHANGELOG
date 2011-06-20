@@ -1,3 +1,8 @@
+gcp 0.1.3 (20/06/11):
+	- fixed exit status
+	- updated manpage with exit status
+	- gcp DIR1 DIR2 syntax fixed	
+	- tests
 gcp 0.1.2 (16/06/11):
 	- removed bad fd close
 	- crash fix when source file can't be openned

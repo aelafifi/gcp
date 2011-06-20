@@ -54,7 +54,7 @@ except ImportError, e:
 
 NAME = "gcp (Goffi's copier)"
 NAME_SHORT = "gcp"
-VERSION = '0.1.2'
+VERSION = '0.1.3'
 
 ABOUT = NAME+u" v"+VERSION+u""" (c) Jérôme Poisson (aka Goffi) 2010, 2011
 
