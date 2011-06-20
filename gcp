@@ -682,4 +682,8 @@ if __name__ == "__main__":
         exit(1)
     if gcp._main_instance:
         gcp.go()
+        if gcp.journal.failed:
+            exit(2)
+        if gcp.journal.partial:
+            exit(1)
 
