@@ -43,7 +43,7 @@ try:
 except ImportError,e:
     error(_("Error during import"))
     error(_("Please check dependecies:"),e)
-    exit(2)
+    exit(1)
 try:
     from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
     pbar_available=True
@@ -622,7 +622,7 @@ class GCP():
             error (_("Invalide --preserve value\nvalid values are:"))
             for value in const_PRESERVE:
                 error('- %s' % value)
-            exit(2)
+            exit(1)
         else:
             options.preserve = preserve
 

@@ -102,6 +102,14 @@ List the names of source file lists.
 .TP
 .B \-\-sources\-full\-list
 List the names of source file lists, including their content.
+.SH EXIT STATUS
+The exit status can be:
+.IP \[bu] 2
+\fB0\fP if files have been copied correctly or if an other instance of gcp is already running and will do the copy.
+.IP \[bu]
+\fB1\fP if at least one file has not been copied, or if something went wrong.
+.IP \[bu]
+\fB2\fP if all files have been copied but with some issues
 .SH LIMITS
 Timestamps preservation with \-\-preserve option is limited by the os python
 module on POSIX systems. Currently, python only returns timestamps in float
