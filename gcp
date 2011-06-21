@@ -66,7 +66,7 @@ under certain conditions.
 ---
 
 This software is an advanced file copier
-Get the latest version at http://www.goffi.org
+Get the latest version at http://wiki.goffi.org/wiki/Gcp
 """)
 
 const_DBUS_INTERFACE = "org.goffi.gcp" 
