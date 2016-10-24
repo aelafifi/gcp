@@ -28,26 +28,26 @@ logging.basicConfig(level=logging.INFO,
 ###
 
 import gettext
-gettext.install('gcp', "i18n", unicode=True)
+gettext.install('gcp', "i18n")
 
 import sys
 import os,os.path
-from optparse import OptionParser, OptionGroup #To be replaced by argparse ASAP
-import cPickle as pickle
+from argparse import ArgumentParser
+import pickle
 try:
     import gobject
     #DBus
     import dbus, dbus.glib
     import dbus.service
     import dbus.mainloop.glib
-except ImportError,e:
+except ImportError as e:
     error(_("Error during import"))
     error(_("Please check dependecies:"),e)
     exit(1)
 try:
     from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
     pbar_available=True
-except ImportError, e:
+except ImportError as e:
     info (_('ProgressBar not available, please download it at http://pypi.python.org/pypi/progressbar'))
     info (_('Progress bar deactivated\n--\n'))
     pbar_available=False
@@ -103,11 +103,13 @@ class DbusObject(dbus.service.Object):
         @return: success (boolean) and error message if any (string)"""
         try:
             args = pickle.loads(str(args))
-        except TypeError, pickle.UnpicklingError:
+        except TypeError as e:
+            pickle.UnpicklingError = e
             return (False, _("INTERNAL ERROR: invalid arguments"))
         try:
             source_dir = pickle.loads(str(source_dir))
-        except TypeError, pickle.UnpicklingError:
+        except TypeError as e:
+            pickle.UnpicklingError = e
             return (False, _("INTERNAL ERROR: invalid source_dir"))
         return self._gcp.parseArguments(args, source_dir)
 
@@ -194,7 +196,7 @@ class GCP():
                                 dbus_interface=const_DBUS_INTERFACE)
             self._main_instance = False
 
-        except dbus.exceptions.DBusException,e:
+        except dbus.exceptions.DBusException as e:
             if e._dbus_error_name=='org.freedesktop.DBus.Error.ServiceUnknown':
                 self.launchDbusMainInstance()
                 debug (_("gcp launched"))
@@ -230,7 +232,7 @@ class GCP():
         #(check freedesktop mounting signals)
         ret =  {}
         try:
-            with open("/proc/mounts",'rb') as mounts:
+            with open("/proc/mounts",'r') as mounts:
                 for line in mounts.readlines():
                    fs_spec, fs_file, fs_vfstype, fs_mntops, fs_freq, fs_passno = line.split(' ')
                    ret[fs_file] = fs_vfstype
@@ -242,14 +244,12 @@ class GCP():
         """Add a file to the copy list
         @param path: absolute path of file
         @param options: options as return by optparse"""
-        debug (_("Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)") % {"path":path.decode('utf-8','replace'),
-                                                                                  "dest_path":dest_path.decode('utf-8','replace'),
-                                                                                   "fs_type":self.getFsType(dest_path)}              )
+        debug (_("Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)") % {"path":path, "dest_path":dest_path, "fs_type":self.getFsType(dest_path)}              )
         try:
             self.bytes_total+=os.path.getsize(path)
             self.copy_list.insert(0,(path, dest_path, options))
-        except OSError,e:
-            error(_("Can't copy %(path)s: %(exception)s") % {'path':path.decode('utf-8','replace'), 'exception':e.strerror})
+        except OSError as e:
+            error(_("Can't copy %(path)s: %(exception)s") % {'path':path, 'exception':e.strerror})
 
 
     def __appendDirToList(self, dirpath, dest_path, options):
@@ -267,21 +267,19 @@ class GCP():
             for filename in os.listdir(dirpath):
                 filepath = os.path.join(dirpath,filename)
                 if os.path.islink(filepath) and not options.dereference:
-                    debug ("Skippink symbolic dir: %s" % filepath.decode('utf-8','replace'))
+                    debug ("Skippink symbolic dir: %s" % filepath)
                     continue
                 if os.path.isdir(filepath):
                     full_dest_path = os.path.join(dest_path,filename)
                     self.__appendDirToList(filepath, full_dest_path, options)
                 else:
                     self.__appendToList(filepath, dest_path, options)
-        except OSError,e:
+        except OSError as e:
             try:
-                error(_("Can't append %(path)s to copy list: %(exception)s") % {'path':filepath.decode('utf-8','replace'),
-                                                             'exception':e.strerror})
+                error(_("Can't append %(path)s to copy list: %(exception)s") % {'path':filepath, 'exception':e.strerror})
             except NameError:
                 #We can't list the dir
-                error(_("Can't access %(dirpath)s: %(exception)s") % {'dirpath':dirpath.decode('utf-8','replace'),
-                                                             'exception':e.strerror})
+                error(_("Can't access %(dirpath)s: %(exception)s") % {'dirpath':dirpath, 'exception':e.strerror})
 
     def __checkArgs(self, options, source_dir, args):
         """Check thats args are files, and add them to copy list
@@ -292,17 +290,17 @@ class GCP():
         len_args = len(args)
         try:
             dest_path = os.path.normpath(os.path.join(source_dir, args.pop()))
-        except OSError,e:
+        except OSError as e:
             error (_("Invalid dest_path: %s"),e)
 
         for path in args:
             abspath = os.path.normpath(os.path.join(os.path.expanduser(source_dir), path))
             if not os.path.exists(abspath):
-                warning(_("The path given in arg doesn't exist or is not accessible: %s") % abspath.decode('utf-8','replace'))
+                warning(_("The path given in arg doesn't exist or is not accessible: %s") % abspath)
             else:
                 if os.path.isdir(abspath):
                     if not options.recursive:
-                        warning (_('omitting directory "%s"') % abspath.decode('utf-8','replace'))
+                        warning (_('omitting directory "%s"') % abspath)
                     else:
                         _basename=os.path.basename(os.path.normpath(path))
                         full_dest_path = dest_path if options.directdir else os.path.normpath(os.path.join(dest_path, _basename))
@@ -327,7 +325,7 @@ class GCP():
             assert(filename)
             dest_file = self.__filename_fix(options.dest_file,options) if options.dest_file else self.__filename_fix(os.path.join(dest_path,filename),options)
             if os.path.exists(dest_file) and not options.force:
-                warning (_("File [%s] already exists, skipping it !") % dest_file.decode('utf-8','replace'))
+                warning (_("File [%s] already exists, skipping it !") % dest_file)
                 self.journal.copyFailed()
                 self.journal.error("already exists")
                 self.journal.closeFile()
@@ -345,8 +343,7 @@ class GCP():
             gobject.io_add_watch(source_fd,gobject.IO_IN,self._copyFile,
                                  (dest_fd, options), priority=gobject.PRIORITY_DEFAULT)
             if not self.progress:
-                info(_("COPYING %(source)s ==> %(dest)s") % {"source":source_file.decode('utf-8','replace'),
-                                                             "dest":dest_file.decode('utf-8','replace')})
+                info(_("COPYING %(source)s ==> %(dest)s") % {"source":source_file, "dest":dest_file})
             return True
         else:
             #Nothing left to copy, we quit
@@ -439,7 +436,7 @@ class GCP():
                     os.chown(dest_file, st_file.st_uid, st_file.st_gid)
                 elif preserve == 'timestamps':
                     os.utime(dest_file, (st_file.st_atime, st_file.st_mtime))
-            except OSError,e:
+            except OSError as e:
                 self.journal.error("preserve-"+preserve)
 
     def __get_string_size(self, size):
@@ -543,69 +540,69 @@ class GCP():
         @return: a tuple (boolean, message) where the boolean is the success of the arguments
                  validation, and message is the error message to print when necessary"""
         _usage="""
-        %prog [options] FILE DEST
-        %prog [options] FILE1 [FILE2 ...] DEST-DIR
+        %(prog)s [options] FILE DEST
+        %(prog)s [options] FILE1 [FILE2 ...] DEST-DIR
 
-        %prog --help for options list
+        %(prog)s --help for options list
         """
         for idx in range(len(full_args)):
-            if isinstance(full_args[idx], unicode):
-                #We don't want unicode as some filenames can be invalid unicode
-                full_args[idx] = full_args[idx].encode('utf-8')
+            full_args[idx] = full_args[idx].encode('utf-8')
 
-        parser = OptionParser(usage=_usage,version=ABOUT)
+        parser = ArgumentParser(usage=_usage)
 
-        parser.add_option("-r", "--recursive", action="store_true", default=False,
+        parser.add_argument("-r", "--recursive", action="store_true", default=False,
                     help=_("copy directories recursively"))
 
-        parser.add_option("-f", "--force", action="store_true", default=False,
+        parser.add_argument("-f", "--force", action="store_true", default=False,
                     help=_("force overwriting of existing files"))
 
-        parser.add_option("--preserve", action="store", default='mode,ownership,timestamps',
+        parser.add_argument("--preserve", action="store", default='mode,ownership,timestamps',
                     help=_("preserve  the  specified  attributes"))
 
-        parser.add_option("-L", "--dereference", action="store_true", default=False,
+        parser.add_argument("-L", "--dereference", action="store_true", default=False,
                     help=_("always follow symbolic links in sources"))
 
-        parser.add_option("-P", "--no-dereference", action="store_false", dest='dereference',
+        parser.add_argument("-P", "--no-dereference", action="store_false", dest='dereference',
                     help=_("never follow symbolic links in sources"))
 
-        #parser.add_option("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
+        #parser.add_argument("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
         #            help=_("don't fix name encoding errors")) #TODO
 
-        parser.add_option("--no-fs-fix", action="store_false", dest='fs_fix', default=True,
+        parser.add_argument("--no-fs-fix", action="store_false", dest='fs_fix', default=True,
                     help=_("don't fix filesystem name incompatibily"))
 
-        parser.add_option("--no-progress", action="store_false", dest="progress", default=True,
+        parser.add_argument("--no-progress", action="store_false", dest="progress", default=True,
                     help=_("deactivate progress bar"))
 
-        parser.add_option("-v", "--verbose", action="store_true", default=False,
+        parser.add_argument("-v", "--verbose", action="store_true", default=False,
                     help=_("Show what is currently done"))
 
-        group_saving = OptionGroup(parser, "sources saving")
+        parser.add_argument("-V", "--version", action="version", version=ABOUT)
 
-        group_saving.add_option("--sources-save", action="store",
+        group_saving = parser.add_argument_group("sources saving")
+
+        group_saving.add_argument("--sources-save", action="store",
                     help=_("Save source arguments"))
 
-        group_saving.add_option("--sources-replace", action="store",
+        group_saving.add_argument("--sources-replace", action="store",
                     help=_("Save source arguments and replace memory if it already exists"))
 
-        group_saving.add_option("--sources-load", action="store",
+        group_saving.add_argument("--sources-load", action="store",
                     help=_("Load source arguments"))
 
-        group_saving.add_option("--sources-del", action="store",
+        group_saving.add_argument("--sources-del", action="store",
                     help=_("delete saved sources"))
 
-        group_saving.add_option("--sources-list", action="store_true", default=False,
+        group_saving.add_argument("--sources-list", action="store_true", default=False,
                     help=_("List names of saved sources"))
 
-        group_saving.add_option("--sources-full-list", action="store_true", default=False,
+        group_saving.add_argument("--sources-full-list", action="store_true", default=False,
                     help=_("List names of saved sources and files in it"))
 
-        parser.add_option_group(group_saving)
+        parser.add_argument_group(group_saving)
 
 
-        (options, args) = parser.parse_args(full_args)
+        (options, args) = parser.parse_known_args()
         options.directdir = False #True only in the special case: we are copying a dir and it doesn't exists
         #options check
         if options.progress and not pbar_available:
@@ -653,7 +650,7 @@ class GCP():
             if len(args) < 2:
                 _error_msg = _("Wrong number of arguments")
                 return (False, _error_msg)
-            debug(_("adding args to gcp: %s") % str(args).decode('utf-8','replace'))
+            debug(_("adding args to gcp: %s") % args)
             self.__checkArgs(options, source_dir, args)
             if not self.__launched:
                 self.journal = Journal()

@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from distribute_setup import use_setuptools
-use_setuptools()
-
 from setuptools import setup
 import sys
 from os import path
@@ -24,8 +21,8 @@ setup(name=name,
                    'Programming Language :: Python',
                    'Topic :: Utilities'
                    ],
-      data_files=[(path.join(sys.prefix,'share/locale/fr/LC_MESSAGES'), ['i18n/fr/LC_MESSAGES/gcp.mo']),
+      data_files=[('share/locale/fr/LC_MESSAGES', ['i18n/fr/LC_MESSAGES/gcp.mo']),
                   ('share/man/man1', ["gcp.1"]),
-                  ('share/doc/%s' % name, ['COPYING','README'])],
+                  ('share/doc/%s' % name, ['COPYING','README.rst'])],
       scripts=['gcp'],
      )
