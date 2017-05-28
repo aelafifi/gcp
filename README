@@ -1,9 +1,11 @@
 gcp v0.1.3
 ====
 (c) Jérôme Poisson aka Goffi 2010, 2011
+(c) Jingbei Li aka petronny 2016, 2017
 
 gcp (Goffi's cp) is a files copier.
 
+__This is a fork of gcp by petronny, not the original one by Goffi.__
 
 ### LICENSE
 
