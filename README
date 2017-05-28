@@ -5,7 +5,8 @@ gcp v0.1.3
 
 gcp (Goffi's cp) is a files copier.
 
-__This is a fork of gcp by petronny, not the original one (the `python2` branch) by Goffi.__
+__This is a fork of gcp by petronny, not the original one (the `python2` branch) by Goffi.  
+But I'm happy to receive issues and pull requests.__
 
 ### LICENSE
 
