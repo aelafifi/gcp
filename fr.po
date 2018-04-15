@@ -246,7 +246,7 @@ msgstr "La barre de progression n'est pas disponible, désactivation"
 
 #: gcp:595
 msgid ""
-"Invalide --preserve value\n"
+"Invalid --preserve value\n"
 "valid values are:"
 msgstr ""
 "La valeur de «--preserve» est invalide\n"

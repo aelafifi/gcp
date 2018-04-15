@@ -141,7 +141,7 @@ msgstr ""
 
 #: gcp:345
 msgid ""
-"Invalide --preserve value\n"
+"Invalid --preserve value\n"
 "valid values are:"
 msgstr ""
 

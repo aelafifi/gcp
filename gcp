@@ -623,7 +623,7 @@ class GCP():
         if len(options.preserve):
             preserve = set(options.preserve.split(','))
             if not preserve.issubset(const_PRESERVE):
-                error (_("Invalide --preserve value\nvalid values are:"))
+                error (_("Invalid --preserve value\nvalid values are:"))
                 for value in const_PRESERVE:
                     error('- %s' % value)
                 exit(1)
