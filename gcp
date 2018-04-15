@@ -69,7 +69,7 @@ This software is an advanced file copier
 Get the latest version at http://wiki.goffi.org/wiki/Gcp
 """)
 
-const_DBUS_INTERFACE = "org.goffi.gcp" 
+const_DBUS_INTERFACE = "org.goffi.gcp"
 const_DBUS_PATH = "/org/goffi/gcp"
 const_BUFF_SIZE = 4096
 const_PRESERVE = set(['mode','ownership','timestamps'])
@@ -86,7 +86,7 @@ class DbusObject(dbus.service.Object):
         dbus.service.Object.__init__(self, bus, path)
         debug(_("Init DbusObject..."))
         self.cb={}
-    
+
     @dbus.service.method(const_DBUS_INTERFACE,
                          in_signature='', out_signature='s')
     def getVersion(self):
@@ -294,7 +294,7 @@ class GCP():
             dest_path = os.path.normpath(os.path.join(source_dir, args.pop()))
         except OSError,e:
             error (_("Invalid dest_path: %s"),e)
-        
+
         for path in args:
             abspath = os.path.normpath(os.path.join(os.path.expanduser(source_dir), path))
             if not os.path.exists(abspath):
@@ -312,7 +312,7 @@ class GCP():
 
     def __copyNextFile(self):
         """Take the last file in the list, and launch the copy using glib io_watch event
-           @return: True a file was added, False else""" 
+           @return: True a file was added, False else"""
         if self.copy_list:
             source_file, dest_path, options = self.copy_list.pop()
             self.journal.startFile(source_file)
@@ -341,7 +341,7 @@ class GCP():
                 self.journal.closeFile()
                 source_fd.close()
                 return True
-                
+
             gobject.io_add_watch(source_fd,gobject.IO_IN,self._copyFile,
                                  (dest_fd, options), priority=gobject.PRIORITY_DEFAULT)
             if not self.progress:
@@ -362,7 +362,7 @@ class GCP():
         self.journal.closeFile()
         source_fd.close()
         dest_fd.close()
-        
+
 
 
     def _copyFile(self, source_fd, condition, data):
@@ -520,7 +520,7 @@ class GCP():
 
         if options.sources_save or options.sources_replace:
             if saved_files.has_key(options.sources_save) and not options.sources_replace:
-                error(_("There is already a saved sources with this name, skipping --sources-save")) 
+                error(_("There is already a saved sources with this name, skipping --sources-save"))
             else:
                 if len(args)>1:
                     saved_files[options.sources_save] = map(os.path.abspath,args[:-1])
@@ -552,24 +552,24 @@ class GCP():
             if isinstance(full_args[idx], unicode):
                 #We don't want unicode as some filenames can be invalid unicode
                 full_args[idx] = full_args[idx].encode('utf-8')
-        
+
         parser = OptionParser(usage=_usage,version=ABOUT)
 
         parser.add_option("-r", "--recursive", action="store_true", default=False,
                     help=_("copy directories recursively"))
-        
+
         parser.add_option("-f", "--force", action="store_true", default=False,
                     help=_("force overwriting of existing files"))
 
         parser.add_option("--preserve", action="store", default='mode,ownership,timestamps',
                     help=_("preserve  the  specified  attributes"))
-        
+
         parser.add_option("-L", "--dereference", action="store_true", default=False,
                     help=_("always follow symbolic links in sources"))
-        
+
         parser.add_option("-P", "--no-dereference", action="store_false", dest='dereference',
                     help=_("never follow symbolic links in sources"))
-        
+
         #parser.add_option("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
         #            help=_("don't fix name encoding errors")) #TODO
 
@@ -578,12 +578,12 @@ class GCP():
 
         parser.add_option("--no-progress", action="store_false", dest="progress", default=True,
                     help=_("deactivate progress bar"))
-        
+
         parser.add_option("-v", "--verbose", action="store_true", default=False,
                     help=_("Show what is currently done"))
 
         group_saving = OptionGroup(parser, "sources saving")
-        
+
         group_saving.add_option("--sources-save", action="store",
                     help=_("Save source arguments"))
 
@@ -592,19 +592,19 @@ class GCP():
 
         group_saving.add_option("--sources-load", action="store",
                     help=_("Load source arguments"))
-        
+
         group_saving.add_option("--sources-del", action="store",
                     help=_("delete saved sources"))
-        
+
         group_saving.add_option("--sources-list", action="store_true", default=False,
                     help=_("List names of saved sources"))
-        
+
         group_saving.add_option("--sources-full-list", action="store_true", default=False,
                     help=_("List names of saved sources and files in it"))
 
         parser.add_option_group(group_saving)
 
-        
+
         (options, args) = parser.parse_args(full_args)
         options.directdir = False #True only in the special case: we are copying a dir and it doesn't exists
         #options check
@@ -642,7 +642,7 @@ class GCP():
                 options.dest_file = None
         else:
             options.dest_file = None
-        
+
         #if there is an other instance of gcp, we send options to it
         if not self._main_instance:
             info (_("There is already one instance of %s running, pluging to it") % NAME_SHORT)

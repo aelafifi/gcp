@@ -59,8 +59,8 @@ def dirCheck(dir_path):
             if isdir(full_path):
                 recursive_sum(full_path, result)
             else:
-                result[full_path] = sha1sum(full_path) 
-    
+                result[full_path] = sha1sum(full_path)
+
     result = {}
     _ori_dir = getcwd()
     chdir(dir_path)
@@ -94,7 +94,7 @@ def makeRandomFile(path, size=S10K, buf_size=4096):
 def makeTestDir(path):
     """Helper method to easily create a test dir
     @param path: where the dir must be created"""
-    
+
     for i in range(2):
         subdir = join(path,'subdir_%d' % i)
         makedirs(subdir)
@@ -198,7 +198,7 @@ class TestCopyCases(unittest.TestCase):
         self.assertEqual(ret,0)
         check_2 = dirCheck('dest_dir')
         self.assertEqual(check_1, check_2)
-    
+
     def test_mixt_copy_existing_dest_nonrecursive(self):
         """Check that a mixt copy (files + dir) to an existing dest without the recursive option work as expected"""
         for i in range(2):
