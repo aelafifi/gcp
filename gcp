@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 """
 gcp: Goffi's CoPier
@@ -35,7 +34,7 @@ import os,os.path
 from argparse import ArgumentParser
 import pickle
 try:
-    import gobject
+    from gi.repository import GObject
     #DBus
     import dbus, dbus.glib
     import dbus.service
@@ -341,8 +340,8 @@ class GCP():
                 source_fd.close()
                 return True
 
-            gobject.io_add_watch(source_fd,gobject.IO_IN,self._copyFile,
-                                 (dest_fd, options), priority=gobject.PRIORITY_DEFAULT)
+            GObject.io_add_watch(source_fd, GObject.IO_IN,self._copyFile,
+                                 (dest_fd, options), priority=GObject.PRIORITY_DEFAULT)
             if not self.progress:
                 info(_("COPYING %(source)s ==> %(dest)s") % {"source":source_file, "dest":dest_file})
             return True
@@ -665,7 +664,7 @@ class GCP():
             self.__checkArgs(options, source_dir, args)
             if not self.__launched:
                 self.journal = Journal()
-                gobject.idle_add(self.__copyNextFile)
+                GObject.idle_add(self.__copyNextFile)
                 self.__launched = True
         return (True,'')
 
@@ -675,7 +674,7 @@ class GCP():
 
     def go(self):
         """Launch main loop"""
-        self.loop = gobject.MainLoop()
+        self.loop = GObject.MainLoop()
         try:
             self.loop.run()
         except KeyboardInterrupt:
