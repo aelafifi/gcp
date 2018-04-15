@@ -73,6 +73,7 @@ const_DBUS_INTERFACE = "org.goffi.gcp"
 const_DBUS_PATH = "/org/goffi/gcp"
 const_BUFF_SIZE = 4096
 const_PRESERVE = set(['mode','ownership','timestamps'])
+const_FS_FIX = set(['auto','force','no'])
 const_FILES_DIR = "~/.gcp"
 const_JOURNAL_PATH = const_FILES_DIR + "/journal"
 const_SAVED_LIST = const_FILES_DIR + "/saved_list"
@@ -411,7 +412,7 @@ class GCP():
         @return: fixed filename"""
         fixed_filename = filename
 
-        if self.getFsType(filename) == 'vfat' and options.fs_fix:
+        if options.fs_fix == 'force' or (options.fs_fix == 'auto' and self.getFsType(filename) == 'vfat'):
             fixed_filename = filename.replace('\\','_')\
                                .replace(':',';')\
                                .replace('*','+')\
@@ -573,8 +574,11 @@ class GCP():
         #parser.add_option("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
         #            help=_("don't fix name encoding errors")) #TODO
 
-        parser.add_option("--no-fs-fix", action="store_false", dest='fs_fix', default=True,
-                    help=_("don't fix filesystem name incompatibily"))
+        parser.add_option("--fs-fix", action="store", dest='fs_fix', default='auto',
+                    help=_("fix filesystem name incompatibily; can be 'auto' (default), 'force' or 'no'"))
+
+        parser.add_option("--no-fs-fix", action="store_true", dest='no_fs_fix', default=False,
+                    help=_("same as --fs-fix=no (overrides --fs-fix)"))
 
         parser.add_option("--no-progress", action="store_false", dest="progress", default=True,
                     help=_("deactivate progress bar"))
@@ -617,9 +621,18 @@ class GCP():
         if options.verbose:
             logging.getLogger().setLevel(logging.DEBUG)
 
+        if options.no_fs_fix:
+            options.fs_fix = 'no'
+        else:
+            if not options.fs_fix in const_FS_FIX:
+                error (_("Invalid --fs-fix value\nvalid values are:"))
+                for value in const_FS_FIX:
+                    error('- %s' % value)
+                exit(1)
+
         preserve = set(options.preserve.split(','))
         if not preserve.issubset(const_PRESERVE):
-            error (_("Invalide --preserve value\nvalid values are:"))
+            error (_("Invalid --preserve value\nvalid values are:"))
             for value in const_PRESERVE:
                 error('- %s' % value)
             exit(1)
