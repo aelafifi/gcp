@@ -72,10 +72,11 @@ is located in `~/.gcp/journal`.
 After the state, a list of things that went wrong is shown, separated by ", ".
 
 
-What's next?
-============
+Contribution ideas
+==================
 
-Several improvement are already planed:
+Here are some ideas for future developments:
+- handle XDG
 - copy queue management (moving copy order)
 - advanced console interface
 - notification (XMPP and maybe email) when a long copy is finished
@@ -83,7 +84,7 @@ Several improvement are already planed:
 - badly encoded unicode filenames fix
 - file copy integrity check
 
-... and other are with a "maybe"
+And in an even more distant future:
 - graphic interface
 - desktop (Kde, Gnome, XFCE...) integration
 - distant copy (FTP)
@@ -132,7 +133,7 @@ Contact
 =======
 
 Feedback, bug reports, patches, etc. are welcome, either by email or on the
-repository's issue tracker.
+repository's issue tracker <https://code.lm7.fr/mcy/gcp/issues>.
 
 You can also have a look at Goffi's other main project, [Salut à
 Toi](https://www.salut-a-toi.org/) (SàT), a Jabber/XMPP-based multi-frontend,
