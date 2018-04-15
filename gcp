@@ -73,6 +73,7 @@ const_DBUS_INTERFACE = "org.goffi.gcp"
 const_DBUS_PATH = "/org/goffi/gcp"
 const_BUFF_SIZE = 4096
 const_PRESERVE = set(['mode','ownership','timestamps'])
+const_FS_FIX = set(['auto','force','no'])
 const_FILES_DIR = "~/.gcp"
 const_JOURNAL_PATH = const_FILES_DIR + "/journal"
 const_SAVED_LIST = const_FILES_DIR + "/saved_list"
@@ -408,7 +409,7 @@ class GCP():
         @return: fixed filename"""
         fixed_filename = filename
 
-        if self.getFsType(filename) == 'vfat' and options.fs_fix:
+        if options.fs_fix == 'force' or (options.fs_fix == 'auto' and self.getFsType(filename) == 'vfat'):
             fixed_filename = filename.replace('\\','_')\
                                .replace(':',';')\
                                .replace('*','+')\
@@ -568,8 +569,11 @@ class GCP():
         #parser.add_argument("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
         #            help=_("don't fix name encoding errors")) #TODO
 
-        parser.add_argument("--no-fs-fix", action="store_false", dest='fs_fix', default=True,
-                    help=_("don't fix filesystem name incompatibily"))
+        parser.add_argument("--fs-fix", choices = const_FS_FIX, dest='fs_fix', default='auto',
+                    help=_("fix filesystem name incompatibily (default: auto)"))
+
+        parser.add_argument("--no-fs-fix", action="store_true", dest='no_fs_fix', default=False,
+                    help=_("same as --fs-fix=no (overrides --fs-fix)"))
 
         parser.add_argument("--no-progress", action="store_false", dest="progress", default=True,
                     help=_("deactivate progress bar"))
@@ -614,6 +618,9 @@ class GCP():
         if options.verbose:
             logging.getLogger().setLevel(logging.DEBUG)
 
+        if options.no_fs_fix:
+            options.fs_fix = 'no'
+
         if len(options.preserve):
             preserve = set(options.preserve.split(','))
             if not preserve.issubset(const_PRESERVE):
@@ -623,6 +630,7 @@ class GCP():
                 exit(1)
             else:
                 options.preserve = preserve
+
         else:
             options.preserve=set()
 
