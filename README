@@ -35,7 +35,7 @@ gcp is a file copier, loosely inspired from cp, but with high level functionalit
 gcp is at an early stage of development, and really experimental: use at your own risks !
 
 ** How to use it ? **
-Pretty much like cp (see gcp --help). 
+Pretty much like cp (see gcp --help).
 Please note that the behaviour is not exactly the same as cp, even if gcp want to be option-compatible. Mainly, the destination filenames can be changed (by default, can be deactivated).
 gcp doesn't implement yet all the options from cp, but it's planed.
 
