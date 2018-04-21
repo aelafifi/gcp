@@ -69,10 +69,13 @@ never follow symbolic links in sources
 .B \-f, \-\-force
 Overwrite existing files.
 .TP
+.B \-p
+Same as \-\-preserve=mode,ownership,timestamps
+.TP
 .B \-\-preserve=PRESERVE
 Keep specified attributes. Attributes can be mode, ownership and timestamps.
 When several attributes are passed, they need to be separated by commas. Note
-that timestamps preservation has some limits, see section LIMITS.
+that timestamps preservation has some limits, see section LIMITATIONS.
 .TP
 .B \-\-no\-fs\-fix
 Don't fix file system naming incompatibilities.
@@ -110,7 +113,7 @@ The exit status can be:
 \fB1\fP if at least one file has not been copied, or if something went wrong.
 .IP \[bu]
 \fB2\fP if all files have been copied but with some issues
-.SH LIMITS
+.SH LIMITATIONS
 Timestamps preservation with \-\-preserve option is limited by the os python
 module on POSIX systems. Currently, python only returns timestamps in float
 format, which is a smaller precision than what POSIX provides. Progress on this
