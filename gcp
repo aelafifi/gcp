@@ -2,8 +2,10 @@
 
 """
 gcp: Goffi's CoPier
-Copyright (C) 2010, 2011  Jérôme Poisson <goffi@goffi.org>
+Copyright (c) 2010, 2011  Jérôme Poisson <goffi@goffi.org>
           (c) 2011        Thomas Preud'homme <robotux@celest.fr>
+          (c) 2016        Jingbei Li <i@jingbei.li>
+          (c) 2018        Matteo Cypriani <mcy@lm7.fr>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -53,20 +55,18 @@ except ImportError as e:
 
 NAME = "gcp (Goffi's copier)"
 NAME_SHORT = "gcp"
-VERSION = '0.1.3'
+VERSION = '0.2.0'
 
-ABOUT = NAME+u" v"+VERSION+u""" (c) Jérôme Poisson (aka Goffi) 2010, 2011
-
+ABOUT = NAME_SHORT + " " + VERSION + """
 ---
-"""+NAME+u""" Copyright (C) 2010  Jérôme Poisson
-""" + _(u"""This program comes with ABSOLUTELY NO WARRANTY;
-This is free software, and you are welcome to redistribute it
-under certain conditions.
----
-
-This software is an advanced file copier
-Get the latest version at http://wiki.goffi.org/wiki/Gcp
-""")
+""" + NAME + """
+Copyright: 2010-2011 Jérôme Poisson <goffi@goffi.org>
+           2011      Thomas Preud'homme <robotux@celest.fr>
+           2016      Jingbei Li <i@jingbei.li>
+           2018      Matteo Cypriani <mcy@lm7.fr>
+This program comes with ABSOLUTELY NO WARRANTY; it is free software,
+and you are welcome to redistribute it under certain conditions.
+"""
 
 const_DBUS_INTERFACE = "org.goffi.gcp"
 const_DBUS_PATH = "/org/goffi/gcp"
