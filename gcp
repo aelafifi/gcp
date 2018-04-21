@@ -551,64 +551,84 @@ class GCP():
         parser = ArgumentParser(usage=_usage,
                                 formatter_class=RawDescriptionHelpFormatter)
 
-        parser.add_argument("-r", "--recursive", action="store_true", default=False,
-                    help=_("copy directories recursively"))
-
-        parser.add_argument("-f", "--force", action="store_true", default=False,
-                    help=_("force overwriting of existing files"))
-
-        parser.add_argument("--preserve", action="store", default='',
-                    help=_("preserve  the  specified  attributes"))
-
-        parser.add_argument("-L", "--dereference", action="store_true", default=False,
-                    help=_("always follow symbolic links in sources"))
-
-        parser.add_argument("-P", "--no-dereference", action="store_false", dest='dereference',
-                    help=_("never follow symbolic links in sources"))
-
-        #parser.add_argument("--no-unicode-fix", action="store_false", dest='unicode_fix', default=True,
-        #            help=_("don't fix name encoding errors")) #TODO
-
-        parser.add_argument("--fs-fix", choices = const_FS_FIX, dest='fs_fix', default='auto',
-                    help=_("fix filesystem name incompatibily (default: auto)"))
-
-        parser.add_argument("--no-fs-fix", action="store_true", dest='no_fs_fix', default=False,
-                    help=_("same as --fs-fix=no (overrides --fs-fix)"))
-
-        parser.add_argument("--no-progress", action="store_false", dest="progress", default=True,
-                    help=_("deactivate progress bar"))
-
-        parser.add_argument("-v", "--verbose", action="store_true", default=False,
-                    help=_("Show what is currently done"))
-
-        parser.add_argument("-V", "--version", action="version", version=ABOUT)
+        parser.add_argument("-r", "--recursive",
+            action="store_true", default=False,
+            help=_("copy directories recursively")
+        )
+        parser.add_argument("-f", "--force",
+            action="store_true", default=False,
+            help=_("force overwriting of existing files")
+        )
+        parser.add_argument("--preserve",
+            action="store", default='',
+            help=_("preserve  the  specified  attributes")
+        )
+        parser.add_argument("-L", "--dereference",
+            action="store_true", default=False,
+            help=_("always follow symbolic links in sources")
+        )
+        parser.add_argument("-P", "--no-dereference",
+            action="store_false", dest='dereference',
+            help=_("never follow symbolic links in sources")
+        )
+        #parser.add_argument("--no-unicode-fix",
+        #    action="store_false", dest='unicode_fix', default=True,
+        #    help=_("don't fix name encoding errors") #TODO
+        #)
+        parser.add_argument("--fs-fix",
+            choices = const_FS_FIX, dest='fs_fix', default='auto',
+            help=_("fix filesystem name incompatibily (default: auto)")
+        )
+        parser.add_argument("--no-fs-fix",
+            action="store_true", dest='no_fs_fix', default=False,
+            help=_("same as --fs-fix=no (overrides --fs-fix)")
+        )
+        parser.add_argument("--no-progress",
+            action="store_false", dest="progress", default=True,
+            help=_("disable progress bar")
+        )
+        parser.add_argument("-v", "--verbose",
+            action="store_true", default=False,
+            help=_("Show what is currently done")
+        )
+        parser.add_argument("-V", "--version",
+            action="version", version=ABOUT
+        )
 
         group_saving = parser.add_argument_group("sources saving")
-
-        group_saving.add_argument("--sources-save", action="store",
-                    help=_("Save source arguments"))
-
-        group_saving.add_argument("--sources-replace", action="store",
-                    help=_("Save source arguments and replace memory if it already exists"))
-
-        group_saving.add_argument("--sources-load", action="store",
-                    help=_("Load source arguments"))
-
-        group_saving.add_argument("--sources-del", action="store",
-                    help=_("delete saved sources"))
-
-        group_saving.add_argument("--sources-list", action="store_true", default=False,
-                    help=_("List names of saved sources"))
-
-        group_saving.add_argument("--sources-full-list", action="store_true", default=False,
-                    help=_("List names of saved sources and files in it"))
-
+        group_saving.add_argument("--sources-save",
+            action="store",
+            help=_("Save source arguments")
+        )
+        group_saving.add_argument("--sources-replace",
+            action="store",
+            help=_("Save source arguments and replace memory if it already exists")
+        )
+        group_saving.add_argument("--sources-load",
+            action="store",
+            help=_("Load source arguments")
+        )
+        group_saving.add_argument("--sources-del",
+            action="store",
+            help=_("delete saved sources")
+        )
+        group_saving.add_argument("--sources-list",
+            action="store_true", default=False,
+            help=_("List names of saved sources")
+        )
+        group_saving.add_argument("--sources-full-list",
+            action="store_true", default=False,
+            help=_("List names of saved sources and files in it")
+        )
         parser.add_argument_group(group_saving)
 
-
         (options, args) = parser.parse_known_args()
-        options.directdir = False #True only in the special case: we are copying a dir and it doesn't exists
-        #options check
+
+        # True only in the special case: we are copying a dir and it doesn't
+        # exists:
+        options.directdir = False
+
+        # options check
         if options.progress and not pbar_available:
             warning (_("Progress bar is not available, deactivating"))
             options.progress = self.progress = False
