@@ -492,7 +492,7 @@ class GCP():
                 saved_files={}
 
         if options.sources_del:
-            if not saved_files.has_key(options.sources_del):
+            if options.sources_del not in saved_files:
                 error(_("No saved sources with this name, check existing names with --sources-list"))
             else:
                 del saved_files[options.sources_del]
@@ -504,7 +504,7 @@ class GCP():
 
         if options.sources_list or options.sources_full_list:
             info(_('Saved sources:'))
-            sources = saved_files.keys()
+            sources = list(saved_files.keys())
             sources.sort()
             for source in sources:
                 info("\t[%s]" % source)
@@ -516,16 +516,16 @@ class GCP():
                 exit(0)
 
         if options.sources_save or options.sources_replace:
-            if saved_files.has_key(options.sources_save) and not options.sources_replace:
+            if options.sources_save in saved_files and not options.sources_replace:
                 error(_("There is already a saved sources with this name, skipping --sources-save"))
             else:
                 if len(args)>1:
-                    saved_files[options.sources_save] = map(os.path.abspath,args[:-1])
+                    saved_files[options.sources_save] = list(map(os.path.abspath,args[:-1]))
                     with open(os.path.expanduser(const_SAVED_LIST),'w') as saved_fd:
                         pickle.dump(saved_files,saved_fd)
 
         if options.sources_load:
-            if not saved_files.has_key(options.sources_load):
+            if options.sources_load not in saved_files:
                 error(_("No saved sources with this name, check existing names with --sources-list"))
             else:
                 saved_args = saved_files[options.sources_load]
