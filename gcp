@@ -32,8 +32,8 @@ import gettext
 gettext.install('gcp', "i18n")
 
 import sys
-import os,os.path
-from argparse import ArgumentParser
+import os, os.path
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 import pickle
 try:
     from gi.repository import GObject
@@ -548,7 +548,8 @@ class GCP():
         for idx in range(len(full_args)):
             full_args[idx] = full_args[idx].encode('utf-8')
 
-        parser = ArgumentParser(usage=_usage)
+        parser = ArgumentParser(usage=_usage,
+                                formatter_class=RawDescriptionHelpFormatter)
 
         parser.add_argument("-r", "--recursive", action="store_true", default=False,
                     help=_("copy directories recursively"))
