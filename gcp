@@ -551,7 +551,7 @@ class GCP():
         parser = ArgumentParser(usage=_usage,
                                 formatter_class=RawDescriptionHelpFormatter)
 
-        parser.add_argument("-r", "--recursive",
+        parser.add_argument("-r", "-R", "--recursive",
             action="store_true", default=False,
             help=_("copy directories recursively")
         )
