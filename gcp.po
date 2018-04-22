@@ -120,7 +120,9 @@ msgid "force overwriting of existing files"
 msgstr ""
 
 #: gcp:321
-msgid "preserve  the  specified  attributes"
+#, python-format
+msgid "preserve  the  specified  attributes; accepted values:\
+'all', or one or more amongst %s"
 msgstr ""
 
 #: gcp:324
@@ -140,9 +142,8 @@ msgid "Progress bar is not available, deactivating"
 msgstr ""
 
 #: gcp:345
-msgid ""
-"Invalid --preserve value\n"
-"valid values are:"
+#, python-format
+msgid "Invalid --preserve value '%s'"
 msgstr ""
 
 #: gcp:354

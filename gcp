@@ -566,7 +566,8 @@ class GCP():
         )
         parser.add_argument("--preserve",
             action="store", default='',
-            help=_("preserve  the  specified  attributes")
+            help=_("preserve  the  specified  attributes; accepted values:\
+                   'all', or one or more amongst %s") % str(const_PRESERVE)
         )
         parser.add_argument("-L", "--dereference",
             action="store_true", default=False,
@@ -646,22 +647,26 @@ class GCP():
         if options.no_fs_fix:
             options.fs_fix = 'no'
 
+        preserve = set()
+
         if options.p:
-            if not options.preserve:
-                options.preserve = const_PRESERVE_p
-            else:
-                options.preserve += ',' + const_PRESERVE_p
+            preserve.update(const_PRESERVE_p.split(','))
 
         if options.preserve:
-            preserve = set(options.preserve.split(','))
-            if not preserve.issubset(const_PRESERVE):
-                error (_("Invalid --preserve value\nvalid values are:"))
-                for value in const_PRESERVE:
-                    error('- %s' % value)
-                exit(1)
-            options.preserve = preserve
-        else:
-            options.preserve = set()
+            preserve.update(options.preserve.split(','))
+            preserve_all = False
+            for value in preserve:
+                if value == 'all':
+                    preserve_all = True
+                    continue
+                if value not in const_PRESERVE:
+                    error (_("Invalid --preserve value '%s'") % value)
+                    exit(1)
+            if preserve_all:
+                preserve.remove('all')
+                preserve.update(const_PRESERVE)
+
+        options.preserve = preserve
 
         self.__sourcesSaving(options, args)
 

@@ -197,8 +197,11 @@ msgid "force overwriting of existing files"
 msgstr "force le remplacement des fichiers déjà existants"
 
 #: gcp:545
-msgid "preserve  the  specified  attributes"
-msgstr "garde les attributs spécifiés"
+#, python-format
+msgid "preserve  the  specified  attributes; accepted values:\
+'all', or one or more amongst %s"
+msgstr "garde les attributs spécifiés; valeurs acceptées : 'all' ou\
+un ou plusieurs éléments parmi %s"
 
 #: gcp:551
 msgid "don't fix filesystem name incompatibily"
@@ -245,12 +248,9 @@ msgid "Progress bar is not available, deactivating"
 msgstr "La barre de progression n'est pas disponible, désactivation"
 
 #: gcp:595
-msgid ""
-"Invalid --preserve value\n"
-"valid values are:"
-msgstr ""
-"La valeur de «--preserve» est invalide\n"
-"Les valeurs valides sont:"
+#, python-format
+msgid "Invalid --preserve value '%s'"
+msgstr "Valeur de --preserve invalide « %s »"
 
 #: gcp:616
 #, python-format
