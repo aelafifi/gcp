@@ -176,12 +176,12 @@ msgstr "Copie de %s"
 msgid ""
 "No saved sources with this name, check existing names with --sources-list"
 msgstr ""
-"Aucun sauvegarde de fichiers sources avec ce nom, veuillez vérifier les "
-"lists existantes avec --sources-list"
+"Aucune sauvegarde de fichiers sources avec ce nom, veuillez vérifier les "
+"listes existantes avec --sources-list"
 
 #: gcp:489
 msgid "Saved sources:"
-msgstr "Liste de sources sauvées:"
+msgstr "Liste de sources sauvées :"
 
 #: gcp:503
 msgid ""
@@ -190,18 +190,20 @@ msgstr "Il y a déjà une liste de sources avec ce nom, --sources-save ignoré"
 
 #: gcp:539
 msgid "copy directories recursively"
-msgstr "copie les répertoire récursivement"
+msgstr "copier les répertoire récursivement"
 
 #: gcp:542
 msgid "force overwriting of existing files"
-msgstr "force le remplacement des fichiers déjà existants"
+msgstr "forcer le remplacement des fichiers déjà existants"
 
 #: gcp:545
 #, python-format
-msgid "preserve  the  specified  attributes; accepted values:\
-'all', or one or more amongst %s"
-msgstr "garde les attributs spécifiés; valeurs acceptées : 'all' ou\
-un ou plusieurs éléments parmi %s"
+msgid ""
+"preserve specified attributes; accepted values: "
+"'all', or one or more amongst %s"
+msgstr ""
+"préserver les attributs spécifiés; valeurs acceptées : "
+"'all' ou un ou plusieurs éléments parmi %s"
 
 #: gcp:551
 msgid "don't fix filesystem name incompatibily"
@@ -209,38 +211,38 @@ msgstr ""
 "Ne corrige pas les incompatibilités des noms pour le système de fichiers"
 
 #: gcp:554
-msgid "deactivate progress bar"
-msgstr "désactive la barre de progression"
+msgid "disable progress bar"
+msgstr "désactiver la barre de progression"
 
 #: gcp:557
 msgid "Show what is currently done"
-msgstr "Affiche les opérations effectuées"
+msgstr "afficher les opérations effectuées"
 
 #: gcp:562
 msgid "Save source arguments"
-msgstr "Sauvegarde la liste des fichiers sources"
+msgstr "sauvegarder la liste des fichiers source"
 
 #: gcp:565
 msgid "Save source arguments and replace memory if it already exists"
 msgstr ""
-"Sauvegarde la liste des fichiers sources et la remplace si elle existe déjà"
+"sauvegarder la liste des fichiers source et la remplacer si elle existe déjà"
 
 #: gcp:568
 msgid "Load source arguments"
-msgstr "Réutilise les fichiers sources à copier"
+msgstr "réutiliser les fichiers source à copier"
 
 #: gcp:571
 msgid "delete saved sources"
-msgstr "Supprime la liste des fichiers sources"
+msgstr "supprimer la liste des fichiers source"
 
 #: gcp:574
 msgid "List names of saved sources"
-msgstr "Liste les noms des listes de fichiers sources"
+msgstr "afficher les noms des listes de fichiers source"
 
 #: gcp:577
 msgid "List names of saved sources and files in it"
 msgstr ""
-"Liste les noms des listes de fichiers sources, en incluant les fichiers "
+"afficher les noms des listes de fichiers sources, en incluant les fichiers "
 "qu'elles contiennent"
 
 #: gcp:585

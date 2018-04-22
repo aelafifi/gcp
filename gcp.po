@@ -121,8 +121,9 @@ msgstr ""
 
 #: gcp:321
 #, python-format
-msgid "preserve  the  specified  attributes; accepted values:\
-'all', or one or more amongst %s"
+msgid ""
+"preserve specified attributes; accepted values: "
+"'all', or one or more amongst %s"
 msgstr ""
 
 #: gcp:324
@@ -130,7 +131,7 @@ msgid "don't fixe name encoding errors"
 msgstr ""
 
 #: gcp:327
-msgid "deactivate progress bar"
+msgid "disable progress bar"
 msgstr ""
 
 #: gcp:330
