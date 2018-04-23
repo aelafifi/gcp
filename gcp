@@ -21,30 +21,32 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-### logging ###
 import logging
 from logging import debug, info, error, warning
-logging.basicConfig(level=logging.INFO,
-                    format='%(message)s')
-###
 
 import gettext
-gettext.install('gcp', "i18n")
 
 import sys
-import os, os.path
+import os
+import os.path
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 import pickle
+
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+gettext.install('gcp', "i18n")
+
 try:
     from gi.repository import GObject
     #DBus
-    import dbus, dbus.glib
+    import dbus
+    import dbus.glib
     import dbus.service
     import dbus.mainloop.glib
 except ImportError as e:
     error(_("Error during import"))
-    error(_("Please check dependecies:"),e)
+    error(_("Please check dependecies:"), e)
     exit(1)
+
 try:
     from progressbar import ProgressBar, Percentage, Bar, ETA, FileTransferSpeed
     pbar_available=True
@@ -229,14 +231,15 @@ class GCP():
 
     def __getMountPoints(self):
         """Parse /proc/mounts to get currently mounted devices"""
-        #TODO: reparse when a new device is added/a device is removed
-        #(check freedesktop mounting signals)
+        # TODO: reparse when a new device is added/a device is removed
+        #       (check freedesktop mounting signals)
         ret =  {}
         try:
             with open("/proc/mounts",'r') as mounts:
                 for line in mounts.readlines():
-                   fs_spec, fs_file, fs_vfstype, fs_mntops, fs_freq, fs_passno = line.split(' ')
-                   ret[fs_file] = fs_vfstype
+                    fs_spec, fs_file, fs_vfstype, \
+                            fs_mntops, fs_freq, fs_passno = line.split(' ')
+                    ret[fs_file] = fs_vfstype
         except:
             error (_("Can't read mounts table"))
         return ret
@@ -245,12 +248,15 @@ class GCP():
         """Add a file to the copy list
         @param path: absolute path of file
         @param options: options as return by optparse"""
-        debug (_("Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)") % {"path":path, "dest_path":dest_path, "fs_type":self.getFsType(dest_path)}              )
+        debug(_("Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)")
+              % {"path":path, "dest_path":dest_path,
+                 "fs_type":self.getFsType(dest_path)})
         try:
             self.bytes_total+=os.path.getsize(path)
             self.copy_list.insert(0,(path, dest_path, options))
         except OSError as e:
-            error(_("Can't copy %(path)s: %(exception)s") % {'path':path, 'exception':e.strerror})
+            error(_("Can't copy %(path)s: %(exception)s")
+                  % {'path':path, 'exception':e.strerror})
 
 
     def __appendDirToList(self, dirpath, dest_path, options):
@@ -449,19 +455,17 @@ class GCP():
 
     def __get_string_size(self, size):
         """Return a nice string representation of a size"""
-
-        if size>=2**50:
-            return _("%.2f PiB") % (float(size)/2**50)
-        elif size>=2**40:
-            return _("%.2f TiB") % (float(size)/2**40)
-        elif size>=2**30:
-            return _("%.2f GiB") % (float(size)/2**30)
-        elif size>=2**20:
-            return _("%.2f MiB") % (float(size)/2**20)
-        elif size>=2**10:
-            return _("%.2f KiB") % (float(size)/2**10)
-        else:
-            return _("%i B") % size
+        if size >= 2**50:
+            return _("%.2f PiB") % (float(size) / 2**50)
+        if size >= 2**40:
+            return _("%.2f TiB") % (float(size) / 2**40)
+        if size >= 2**30:
+            return _("%.2f GiB") % (float(size) / 2**30)
+        if size >= 2**20:
+            return _("%.2f MiB") % (float(size) / 2**20)
+        if size >= 2**10:
+            return _("%.2f KiB") % (float(size) / 2**10)
+        return _("%i B") % size
 
     def _pbar_update(self):
         """Update progress bar position, create the bar if it doesn't exist"""
@@ -469,12 +473,16 @@ class GCP():
         try:
             if self.pbar.maxval != self.bytes_total:
                 self.pbar.maxval = self.bytes_total
-                self.pbar.widgets[0] = _("Copying %s") % self.__get_string_size(self.bytes_total)
+                pbar_msg = _("Copying %s") % self.__get_string_size(self.bytes_total)
+                self.pbar.widgets[0] = pbar_msg
         except AttributeError:
             if not self.bytes_total:
-                #No progress bar if the files have a null size
+                # No progress bar if the files have a null size
                 return
-            self.pbar = ProgressBar(self.bytes_total,[_("Copying %s") % self.__get_string_size(self.bytes_total)," ",Percentage()," ",Bar()," ",FileTransferSpeed()," ",ETA()])
+            pbar_msg = _("Copying %s") % self.__get_string_size(self.bytes_total)
+            self.pbar = ProgressBar(self.bytes_total,
+                                    [pbar_msg, " ", Percentage(), " ", Bar(),
+                                     " ", FileTransferSpeed(), " ", ETA()])
             self.pbar.start()
         self.pbar.update(self.bytes_copied)
 

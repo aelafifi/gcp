@@ -24,7 +24,6 @@ import unittest
 from os import getcwd, chdir, system, mkdir, makedirs, listdir
 from os.path import join, isdir
 from shutil import rmtree
-from random import randrange
 from hashlib import sha1
 
 # gcp command. This assumes gcp is in the PATH. Alternatively, we could use
@@ -78,7 +77,7 @@ def dirCheck(dir_path):
 #    @param size: size of the file to create in bytes
 #    """
 #    def seq(size):
-#        return ''.join(chr(randrange(256)) for i in range(size))
+#        return ''.join(chr(random.randrange(256)) for i in range(size))
 #    fd = open(path, 'w')
 #    for byte in range(size//buf_size):
 #        fd.write(seq(buf_size))
@@ -92,7 +91,7 @@ def makeRandomFile(path, size=S10K, buf_size=4096):
     """
     source = open('/dev/urandom', 'rb')
     dest = open(path, 'wb')
-    for byte in range(size // buf_size):
+    for _ in range(size // buf_size):
         dest.write(source.read(buf_size))
     dest.write(source.read(size % buf_size))
     dest.close()
@@ -239,6 +238,7 @@ class TestCopyCases(unittest.TestCase):
         self.assertEqual(ret >> 8, 1)
         check_after = dirCheck('.')
         self.assertEqual(check_before, check_after)
+
 
 if __name__ == '__main__':
     unittest.main()
