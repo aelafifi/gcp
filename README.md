@@ -45,6 +45,27 @@ functionalities such as:
 risks!
 
 
+Installing
+==========
+
+The Python way
+--------------
+
+    pip3 install gcp
+
+Note that you should have the following packages installed so that pip can
+complete the installation (Debian packages names, but you get the idea):
+- libdbus-1-dev
+- libdbus-glib-1-dev
+- libgirepository1.0-dev
+- libcairo2-dev
+
+On Debian-based systems
+-----------------------
+
+    apt install gcp
+
+
 How to use it?
 ==============
 
