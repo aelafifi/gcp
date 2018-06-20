@@ -1,21 +1,35 @@
-gcp 0.1.3 (20/06/11):
-	- fixed exit status
-	- updated manpage with exit status
-	- gcp DIR1 DIR2 syntax fixed
-	- tests
-gcp 0.1.2 (16/06/11):
-	- removed bad fd close
-	- crash fix when source file can't be openned
-	- symbolic link skipping (--dereferrence and --no-dereferrence options)
-	- unaccessible source dir crash fix
-	- os.stat precision fix
-	- manpage
-	- install script
-gcp 0.1.1 (30/09/10):
-	- double entry check in journal
-	- unicode source_path send via dbus (second instance of gcp) fixed
-	- errors are now shown after copy
-	- fixed bad closure when a file already exists
-	- added "gcp SOURCE_FILE DEST_FILE" syntax management
-gcp 0.1 (28/09/10):
-	**INITIAL PUBLIC RELEASE**
+gcp 0.2.0 (UNRELEASED, Matteo Cypriani):
+- actually switch to Python3
+- cp compatibibility:
+  + don't preserve any attributes by default (Jingbei Li)
+  + added -p switch (same as --preserve=mode,ownership,timestamps)
+  + added -R switch (same as --recursive)
+- new --fs-fix option
+
+gcp 0.1.4.dev1 (unreleased, Jingbei Li):
+- main Python3 migration work
+
+gcp 0.1.3 (2011-06-20, Goffi):
+- fixed exit status
+- updated manpage with exit status
+- gcp DIR1 DIR2 syntax fixed
+- tests
+
+gcp 0.1.2 (2011-06-16, Goffi):
+- removed bad fd close
+- crash fix when source file can't be openned
+- symbolic link skipping (--dereferrence and --no-dereferrence options)
+- unaccessible source dir crash fix
+- os.stat precision fix
+- manpage
+- install script
+
+gcp 0.1.1 (2010-09-30, Goffi):
+- double entry check in journal
+- unicode source_path send via dbus (second instance of gcp) fixed
+- errors are now shown after copy
+- fixed bad closure when a file already exists
+- added "gcp SOURCE_FILE DEST_FILE" syntax management
+
+gcp 0.1 (2010-09-28, Goffi):
+- **INITIAL PUBLIC RELEASE**
