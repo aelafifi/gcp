@@ -317,13 +317,15 @@ class GCP():
 
     def __copyNextFile(self):
         """Takes the last file in the list and launches the copy using glib
-           io_watch event."""
+           io_watch event.
+           @return: True a file was added, False otherwise."""
         if not self.copy_list:
             # Nothing left to copy, we quit
             if self.progress:
                 self.__pbar_finish()
             self.journal.showErrors()
             self.loop.quit()
+            return False
 
         source_file, dest_path, options = self.copy_list.pop()
         self.journal.startFile(source_file)
@@ -333,7 +335,7 @@ class GCP():
             self.journal.copyFailed()
             self.journal.error("can't open source")
             self.journal.closeFile()
-            return
+            return True
 
         filename = os.path.basename(source_file)
         assert(filename)
@@ -348,7 +350,7 @@ class GCP():
             self.journal.error("already exists")
             self.journal.closeFile()
             source_fd.close()
-            return
+            return True
 
         try:
             dest_fd = open(dest_file, 'wb')
@@ -357,7 +359,7 @@ class GCP():
             self.journal.error("can't open dest")
             self.journal.closeFile()
             source_fd.close()
-            return
+            return True
 
         GObject.io_add_watch(source_fd, GObject.IO_IN,self._copyFile,
                              (dest_fd, options),
@@ -365,6 +367,7 @@ class GCP():
         if not self.progress:
             info(_("COPYING %(source)s ==> %(dest)s")
                  % {"source":source_file, "dest":dest_file})
+        return True
 
     def __copyFailed(self, reason, source_fd, dest_fd):
         """Write the failure in the journal and close files descriptors"""
