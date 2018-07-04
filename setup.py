@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from setuptools import setup
+import setuptools
 
 name = 'gcp'
 
-setup(
+setuptools.setup(
     name=name,
     version='0.2.0',
     url='https://code.lm7.fr/mcy/gcp',
@@ -36,12 +36,15 @@ setup(
         'Topic :: Utilities',
     ],
 
+    scripts=['gcp'],
+#    entry_points={
+#        'console_scripts': ['gcp=gcp:main'],
+#    },
     data_files=[
         ('share/locale/fr/LC_MESSAGES', ['i18n/fr/LC_MESSAGES/gcp.mo']),
         ('share/man/man1', ["gcp.1"]),
-        ('share/doc/%s' % name, ['LICENSE.txt', 'README.md']),
+        ('share/doc/%s' % name, ['CHANGELOG', 'LICENSE.txt', 'README.md']),
     ],
-    scripts=['gcp'],
     install_requires=['PyGObject', 'dbus-python'],
     python_requires='>=3',
 )
