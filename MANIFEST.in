@@ -1,4 +1,0 @@
-include CHANGELOG LICENSE.txt README* gcp.1
-global-include *.py
-global-include *.po *.mo
-global-exclude *.un~ *.sw?
