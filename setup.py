@@ -39,7 +39,7 @@ setup(
     data_files=[
         ('share/locale/fr/LC_MESSAGES', ['i18n/fr/LC_MESSAGES/gcp.mo']),
         ('share/man/man1', ["gcp.1"]),
-        ('share/doc/%s' % name, ['COPYING', 'README.md']),
+        ('share/doc/%s' % name, ['LICENSE.txt', 'README.md']),
     ],
     scripts=['gcp'],
     install_requires=['PyGObject', 'dbus-python'],

@@ -1,5 +1,5 @@
 include MANIFEST.in gcp.1
 global-include *.py
 global-include *.po *.mo
-global-include CHANGELOG COPYING* README*
+global-include CHANGELOG LICENSE.txt README*
 global-exclude *.un~ *.swp
