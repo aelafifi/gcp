@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-gcp: Goffi's CoPier
+gcp: Gcp CoPier
 Copyright (c) 2010, 2011  Jérôme Poisson <goffi@goffi.org>
           (c) 2011        Thomas Preud'homme <robotux@celest.fr>
           (c) 2016        Jingbei Li <i@jingbei.li>
@@ -55,7 +55,7 @@ except ImportError as e:
     info (_('Progress bar deactivated\n--\n'))
     pbar_available=False
 
-NAME = "gcp (Goffi's copier)"
+NAME = "gcp (Gcp CoPier)"
 NAME_SHORT = "gcp"
 VERSION = '0.2.0'
 

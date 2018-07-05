@@ -1,7 +1,8 @@
 gcp
 ===
 
-gcp (Goffi's cp) is a file copier.
+gcp is a user-friendly file copier written in Python. Its name used to stand
+for "Goffi's CoPier", but was changed into a recursive acronym: Gcp CoPier.
 
 
 License
@@ -145,9 +146,9 @@ Big thanks to contributors and package maintainers.
 Contributors
 ============
 
-* Original author: Jérôme Poisson aka Goffi <goffi@goffi.org> 2010-2011.
+* Original author: Jérôme Poisson a.k.a. Goffi <goffi@goffi.org> 2010-2011.
 * Thomas Preud'homme <robotux@celest.fr> 2011: manpage, stat resolution fix.
-* Jingbei Li aka petronny 2016: conversion to Python3.
+* Jingbei Li a.k.a. petronny 2016: conversion to Python3.
 * Matteo Cypriani <mcy@lm7.fr> 2018: `--fs-fix` option, Python3 fixes.
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-gcp: Goffi's CoPier -- unit tests
+gcp: Gcp CoPier -- unit tests
 Copyright (c) 2010, 2011  Jérôme Poisson <goffi@goffi.org>
 Copyright (c) 2018        Matteo Cypriani <mcy@lm7.fr>
 
