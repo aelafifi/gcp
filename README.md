@@ -59,6 +59,7 @@ complete the installation (Debian packages names, but you get the idea):
 - libdbus-glib-1-dev
 - libgirepository1.0-dev
 - libcairo2-dev
+- python3-cairo-dev
 
 On Debian-based systems
 -----------------------
