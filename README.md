@@ -52,15 +52,16 @@ Installing
 The Python way
 --------------
 
-    pip3 install gcp
-
-Note that you should have the following packages installed so that pip can
-complete the installation (Debian packages names, but you get the idea):
+First, install the following packages on your system (these Debian packages
+names, they may be different on other distros/systems):
 - libdbus-1-dev
 - libdbus-glib-1-dev
 - libgirepository1.0-dev
 - libcairo2-dev
 - python3-cairo-dev
+
+Then install gcp with pip:
+    pip3 install gcp
 
 On Debian-based systems
 -----------------------
