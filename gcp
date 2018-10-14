@@ -264,7 +264,7 @@ class GCP():
         @param path: absolute path of dir
         @param options: options as return by optparse"""
         #We first check that the dest path exists, and create it if needed
-        dest_path = self.__filename_fix(dest_path, options, no_journal=True)
+        dest_path = self.__fix_filenames(dest_path, options, no_journal=True)
         if not os.path.exists(dest_path):
             debug ("Creating directory %s" % dest_path)
             os.makedirs(dest_path) #TODO: check permissions
@@ -340,10 +340,10 @@ class GCP():
         filename = os.path.basename(source_file)
         assert(filename)
         if options.dest_file:
-            dest_file = self.__filename_fix(options.dest_file, options)
+            dest_file = self.__fix_filenames(options.dest_file, options)
         else:
-            dest_file = self.__filename_fix(os.path.join(dest_path, filename),
-                                            options)
+            dest_file = self.__fix_filenames(os.path.join(dest_path, filename),
+                                             options)
         if os.path.exists(dest_file) and not options.force:
             warning (_("File [%s] already exists, skipping it!") % dest_file)
             self.journal.copyFailed()
@@ -417,7 +417,7 @@ class GCP():
         except KeyboardInterrupt:
             self._userInterruption()
 
-    def __filename_fix(self, filename, options, no_journal=False):
+    def __fix_filenames(self, filename, options, no_journal=False):
         """Fix filenames incompatibilities/mistake according to options
         @param filename: full path to the file
         @param options: options as parsed on command line
@@ -425,7 +425,7 @@ class GCP():
         @return: fixed filename"""
         fixed_filename = filename
 
-        if options.fs_fix == 'force' or (options.fs_fix == 'auto' and self.getFsType(filename) == 'vfat'):
+        if options.fix_filenames == 'force' or (options.fix_filenames == 'auto' and self.getFsType(filename) == 'vfat'):
             fixed_filename = filename.replace('\\','_')\
                                .replace(':',';')\
                                .replace('*','+')\
@@ -561,8 +561,6 @@ class GCP():
         _usage="""
         %(prog)s [options] FILE DEST
         %(prog)s [options] FILE1 [FILE2 ...] DEST-DIR
-
-        %(prog)s --help for options list
         """
         for idx in range(len(full_args)):
             full_args[idx] = full_args[idx].encode('utf-8')
@@ -570,54 +568,62 @@ class GCP():
         parser = ArgumentParser(usage=_usage,
                                 formatter_class=RawDescriptionHelpFormatter)
 
-        parser.add_argument("-r", "-R", "--recursive",
-            action="store_true", default=False,
-            help=_("copy directories recursively")
+        parser.add_argument("-V", "--version",
+            action="version", version=ABOUT
         )
-        parser.add_argument("-f", "--force",
+
+        group_cplike = parser.add_argument_group("cp-like options")
+        group_cplike.add_argument("-f", "--force",
             action="store_true", default=False,
             help=_("force overwriting of existing files")
         )
-        parser.add_argument("-p",
-            action="store_true", default=False,
-            help=_("same as --preserve=%s" % const_PRESERVE_p)
-        )
-        parser.add_argument("--preserve",
-            action="store", default='',
-            help=_("preserve specified attributes; accepted values: \
-'all', or one or more amongst %s") % str(const_PRESERVE)
-        )
-        parser.add_argument("-L", "--dereference",
+        group_cplike.add_argument("-L", "--dereference",
             action="store_true", default=False,
             help=_("always follow symbolic links in sources")
         )
-        parser.add_argument("-P", "--no-dereference",
+        group_cplike.add_argument("-P", "--no-dereference",
             action="store_false", dest='dereference',
             help=_("never follow symbolic links in sources")
         )
+        group_cplike.add_argument("-p",
+            action="store_true", default=False,
+            help=_("same as --preserve=%s" % const_PRESERVE_p)
+        )
+        group_cplike.add_argument("--preserve",
+            action="store", default='',
+            help=_("preserve specified attributes; accepted values: \
+                   'all', or one or more amongst %s") % str(const_PRESERVE)
+        )
+        group_cplike.add_argument("-r", "-R", "--recursive",
+            action="store_true", default=False,
+            help=_("copy directories recursively")
+        )
+        group_cplike.add_argument("-v", "--verbose",
+            action="store_true", default=False,
+            help=_("Show what is currently done")
+        )
+        parser.add_argument_group(group_cplike)
+
+        group_gcpspecific = parser.add_argument_group("gcp-specific options")
         #parser.add_argument("--no-unicode-fix",
         #    action="store_false", dest='unicode_fix', default=True,
         #    help=_("don't fix name encoding errors") #TODO
         #)
-        parser.add_argument("--fs-fix",
-            choices = const_FS_FIX, dest='fs_fix', default='auto',
-            help=_("fix filesystem name incompatibily (default: auto)")
+        group_gcpspecific.add_argument("--fix-filenames",
+            choices = const_FS_FIX, dest='fix_filenames', default='auto',
+            help=_("fix file names incompatible with the destination \
+                   file system (default: auto)")
         )
-        parser.add_argument("--no-fs-fix",
+        group_gcpspecific.add_argument("--no-fs-fix",
             action="store_true", dest='no_fs_fix', default=False,
-            help=_("same as --fs-fix=no (overrides --fs-fix)")
+            help=_("[DEPRECATED] same as --fix-filename=no (overrides \
+                   --fix-filenames)")
         )
-        parser.add_argument("--no-progress",
+        group_gcpspecific.add_argument("--no-progress",
             action="store_false", dest="progress", default=True,
             help=_("disable progress bar")
         )
-        parser.add_argument("-v", "--verbose",
-            action="store_true", default=False,
-            help=_("Show what is currently done")
-        )
-        parser.add_argument("-V", "--version",
-            action="version", version=ABOUT
-        )
+        parser.add_argument_group(group_gcpspecific)
 
         group_saving = parser.add_argument_group("sources saving")
         group_saving.add_argument("--sources-save",
@@ -663,7 +669,7 @@ class GCP():
             logging.getLogger().setLevel(logging.DEBUG)
 
         if options.no_fs_fix:
-            options.fs_fix = 'no'
+            options.fix_filenames = 'no'
 
         preserve = set()
 
