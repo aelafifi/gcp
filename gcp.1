@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH GCP 1 "June 04, 2011"
+.TH GCP 1 "October 14, 2018"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -15,6 +15,9 @@
 .\" .br        insert line break
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
+.\" TeX users may be more comfortable with the \fB<whatever>\fP and
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics,
+.\" respectively.
 .SH NAME
 gcp \- Advanced command-line file copier
 .SH SYNOPSIS
@@ -28,77 +31,109 @@ gcp \- Advanced command-line file copier
 .RI [ FILE2 ... ]
 .I DEST-DIR
 .SH DESCRIPTION
-This manual page documents briefly the
-.B gcp
-command.
-.PP
-.\" TeX users may be more comfortable with the \fB<whatever>\fP and
-.\" \fI<whatever>\fP escape sequences to invode bold face and italics,
-.\" respectively.
-\fBgcp\fP is a file copier, loosely inspired by cp, but with high level functionalities like:
- \- transfer progression indication
- \- continuous copying when there is an issue: it skips the problematic file and goes on
- \- copy status logging: which files were effectively copied
- \- name mangling to handle target filesystem limitations (e.g. removing incompatible chars like "?" or "*" on vfat)
- \- forced copy serialization: new files to copy are added to a global queue to avoid hard drive head seeks
- \- transfer list management: gcp can save a list of files to copy and reuse it later
- \- approximate option compatibility with cp (approximate because the behaviour is not exactly the same, see below)
+\fBgcp\fP is a file copier, loosely inspired by cp, but with high level
+functionalities like:
+.IP \(bu 2
+transfer progression indication
+.IP \(bu
+continuous copying when there is an issue: it skips the problematic file and
+goes on
+.IP \(bu
+copy status logging: which files were effectively copied
+.IP \(bu
+name mangling to handle target filesystem limitations (e.g. removing
+incompatible chars like "?" or "*" on FAT filesystems)
+.IP \(bu
+forced copy serialization: new files to copy are added to a global queue to
+avoid hard drive head seeks
+.IP \(bu
+transfer list management: gcp can save a list of files to copy and reuse it
+later
+.IP \(bu
+approximate option compatibility with cp (approximate because the behaviour is
+not exactly the same, see below)
 .SH OPTIONS
 These programs follow the usual GNU command line syntax, with long
 options starting with two dashes (`-').
-By default, calling gcp is equivalent to calling gcp \-\-preserve=mode,ownership,timestamps.
 .PP
 A summary of options is included below.
-.SS "General options"
-.TP
-.B \-\-version
-Show version of program and exit.
+.SS General options
 .TP
 .B \-h, \-\-help
 Show summary of options.
 .TP
-.B \-r, \-R, \-\-recursive
-Copy directories recursively.
-.TP
-.B \-L, \-\-dereference
-always follow symbolic links in sources
-.TP
-.B \-P, \-\-no\-dereference
-never follow symbolic links in sources
+.B \-V, \-\-version
+Show program version and copyright information and exit.
+.SS cp-like options
 .TP
 .B \-f, \-\-force
 Overwrite existing files.
 .TP
+.B \-L, \-\-dereference
+Always follow symbolic links in sources.
+.TP
+.B \-P, \-\-no\-dereference
+Never follow symbolic links in sources.
+.TP
 .B \-p
-Same as \-\-preserve=mode,ownership,timestamps
+Same as \fB\-\-preserve=mode,ownership,timestamps\fP
 .TP
-.B \-\-preserve=PRESERVE
-Keep specified attributes. Attributes can be mode, ownership and timestamps.
-When several attributes are passed, they need to be separated by commas. Note
-that timestamps preservation has some limits, see section LIMITATIONS.
+.B \-\-preserve=<\fIattributes\fP>
+Preserve specified attributes. Attributes can be \fImode\fP, \fIownership\fP
+and \fItimestamps\fP.
+When several attributes are passed, they need to be separated by commas.
+Please note that timestamps preservation has some limits, see section
+\fILIMITATIONS\fP.
 .TP
-.B \-\-no\-fs\-fix
-Don't fix file system naming incompatibilities.
-.TP
-.B \-\-no\-progress
-Disable progress bar.
+.B \-r, \-R, \-\-recursive
+Copy directories recursively.
 .TP
 .B \-v, \-\-verbose
 Display what is being done.
-.SS "Sources saving"
+.SS gcp-specific options
 .TP
-.B \-\-sources\-save=SOURCES_SAVE
-Save the list of source files in a list named SOURCES_SAVE.
+.B \-\-fix\-filenames=<\fIforce\fP|\fIauto\fP|\fIno\fP>
+gcp has the ability to modify the destination file name if the target file
+system would not accept the original file name.
+Offending characters will be replaced with similar-looking ones.
+.IP
+This option accept the following values:
+.RS
 .TP
-.B \-\-sources\-replace=SOURCES_REPLACE
-Save the list of source files in a list named SOURCES_REPLACE and
-replace it if it already exists.
+\fIauto\fP (default)
+gcp will attempt to be smart, i.e. detect incompatibilities and fix them as-needed.
 .TP
-.B \-\-sources\-load=SOURCES_LOAD
-Reuse the list of source file named SOURCES_LOAD.
+\fIforce\fP
+Always fix file names that could cause problems on any known filesystem or OS.
+This is useful e.g. with NTFS, see \fINOTE ON NTFS\fP below.
 .TP
-.B \-\-sources\-del=SOURCES_DEL
-Delete the list of source files named SOURCES_DEL.
+\fIno\fP
+Renaming is disabled entirely.
+.RE
+.IP
+Currently, gcp is only aware of FAT incompatibilities:
+\'\\\', \':\', \'*\', \'?\', \'"\', \'<\', \'>\' and \'|\'.
+.TP
+.B \-\-no\-fs\-fix (DEPRECATED)
+Same as \fB\-\-fix\-filenames=no\fP.
+This option will be removed in a future release.
+.TP
+.B \-\-no\-progress
+Disable progress bar.
+.SS Sources saving
+.TP
+.B \-\-sources\-save=\fISOURCES\fP
+Save the list of source files in a list named \fISOURCES\fP.
+.TP
+.B \-\-sources\-replace=\fISOURCES\fP
+Save the list of source files in a list named \fISOURCES\fP;
+the file is overwritten it already exists.
+.TP
+.B \-\-sources\-load=\fISOURCES\fP
+Use the list of source files named \fISOURCES\fP.
+.TP
+.B \-\-sources\-del=\fISOURCES\fP
+Delete the list of source files named \fISOURCES\fP.
 .TP
 .B \-\-sources\-list
 List the names of source file lists.
@@ -108,21 +143,33 @@ List the names of source file lists, including their content.
 .SH EXIT STATUS
 The exit status can be:
 .IP \[bu] 2
-\fB0\fP if files have been copied correctly or if another instance of gcp is already running and will do the copy.
+\fB0\fP if files have been copied correctly or if another instance of gcp is
+already running and will do the copy.
 .IP \[bu]
 \fB1\fP if at least one file has not been copied, or if something went wrong.
 .IP \[bu]
 \fB2\fP if all files have been copied but with some issues
 .SH LIMITATIONS
-Timestamps preservation with \-\-preserve option is limited by the os python
-module on POSIX systems. Currently, python only returns timestamps in float
-format, which is a smaller precision than what POSIX provides. Progress on this
-issue can be seen at http://bugs.python.org/issue11457.
+Timestamps preservation with \fB\-\-preserve\fP option is limited by the
+\fIos\fP Python module on POSIX systems. Currently, Python only returns
+timestamps in float format, which is a smaller precision than what POSIX
+provides. Progress on this issue can be seen at
+http://bugs.python.org/issue11457.
+.PP
+The \fB\-\-preserve\fP option cannot currently be used without an attribute
+list (\fBgcp \-\-preserve foo bar\fP will behave as \fBgcp \-\-preserve=foo
+bar\fP). Use the \fB\-p\fP switch instead.
+.SH NOTE ON NTFS
+NTFS will not enforce the same file name limitations than FAT, but files that
+would not be accepted on a FAT filesystem will still cause problems on Windows.
+Hence, it is recommended to use \-\-fix-filenames=force when copying to NTFS
+(when Windows compatibility is desired, anyway).
 .SH SEE ALSO
 .BR cp (1).
 .br
 .SH AUTHOR
 gcp was written by Jérôme Poisson <goffi@goffi.org>.
+It is currently maintained by Matteo Cypriani <mcy@lm7.fr>.
 .PP
-This manual page was written by Thomas Preud'homme <robotux@celest.fr>,
-for the Debian project (and may be used by others).
+This manual page was initially written by Thomas Preud'homme
+<robotux@celest.fr> for the Debian project (and may be used by others).
