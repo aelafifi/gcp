@@ -43,7 +43,7 @@ setuptools.setup(
     data_files=[
         ('share/locale/fr/LC_MESSAGES', ['i18n/fr/LC_MESSAGES/gcp.mo']),
         ('share/man/man1', ["gcp.1"]),
-        ('share/doc/%s' % name, ['CHANGELOG', 'LICENSE.txt', 'README.md']),
+        ('share/doc/%s' % name, ['CHANGELOG', 'LICENSE', 'README.md']),
     ],
     install_requires=['PyGObject', 'dbus-python'],
     python_requires='>=3',
