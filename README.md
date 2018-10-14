@@ -76,7 +76,7 @@ Pretty much like cp (see `gcp --help`).
 
 Please note that the behaviour is not exactly the same as cp's, even if gcp
 aims to be option-compatible. Mainly, the destination filenames can be modified
-(cf. the `--fs-fix` option).
+(cf. the `--fix-filenames` option).
 
 gcp doesn't implement all the options from cp yet, but it's a long-term goal.
 
@@ -150,7 +150,7 @@ Contributors
 * Original author: Jérôme Poisson a.k.a. Goffi <goffi@goffi.org> 2010-2011.
 * Thomas Preud'homme <robotux@celest.fr> 2011: manpage, stat resolution fix.
 * Jingbei Li a.k.a. petronny 2016: conversion to Python3.
-* Matteo Cypriani <mcy@lm7.fr> 2018: `--fs-fix` option, Python3 fixes.
+* Matteo Cypriani <mcy@lm7.fr> 2018: `--fix-filenames` option, Python3 fixes.
 
 
 Contact
