@@ -239,6 +239,19 @@ class TestCopyCases(unittest.TestCase):
         check_after = dirCheck('.')
         self.assertEqual(check_before, check_after)
 
+    def test_fix_filenames(self):
+        """Checks the --fix-filenames option.
+        """
+        source = 'wi||fat<like>this:"file*name"?'
+        fixed_name = 'wi!!fat[like]this;\'file+name\'_'
+        makeRandomFile(source, S10K)
+        source_sha = sha1sum(source)
+        mkdir('dest_dir')
+        ret = system(GCP + " --fix-filenames=force '" + source + "' dest_dir")
+        self.assertNotEqual(ret, 0)
+        dest = join('dest_dir', fixed_name)
+        dest_sha = sha1sum(dest)
+        self.assertEqual(source_sha, dest_sha)
 
 if __name__ == '__main__':
     unittest.main()
