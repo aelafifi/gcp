@@ -1,10 +1,11 @@
-gcp 0.2.0 (UNRELEASED, Matteo Cypriani):
+gcp 0.2.0 (2018-10-14, Matteo Cypriani):
 - actually switch to Python3
 - cp compatibibility:
   + don't preserve any attributes by default (Jingbei Li)
   + added -p switch (same as --preserve=mode,ownership,timestamps)
   + added -R switch (same as --recursive)
-- new --fs-fix option
+- new --fix-filenames option
+- reworked packaging
 
 gcp 0.1.4.dev1 (unreleased, Jingbei Li):
 - main Python3 migration work
