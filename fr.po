@@ -1,36 +1,40 @@
 # gcp -- French translation file
+#
 # Copyright:
 #     2010 Jérôme Poisson (Goffi) <goffi@goffi.org>
 #     2018 Matteo Cypriani <mcy@lm7.fr>
+#
 # This file is distributed under the same license as the gcp package.
-#, fuzzy
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-09-30 18:05+0800\n"
-"PO-Revision-Date: 2018-04-22 20:35+0200\n"
+"PO-Revision-Date: 2018-10-14 20:56+0200\n"
 "Last-Translator: Matteo Cypriani <mcy@lm7.fr>\n"
-"Language: French\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.2\n"
 
-#: gcp:45
+#: gcp:46
 msgid "Error during import"
 msgstr "Erreur pendant l'import de bibliothèques"
 
-#: gcp:46
+#: gcp:47
 msgid "Please check dependecies:"
 msgstr "Merci de vérifier les dépendances :"
 
-#: gcp:52
+#: gcp:54
 msgid "ProgressBar not available, please download it at https://pypi.org/"
 msgstr ""
-"ProgressBar n'est pas disponible, merci de le télécharger depuis"
-"https://pypi.org/"
+"ProgressBar n'est pas disponible, merci de le télécharger depuishttps://pypi."
+"org/"
 
-#: gcp:3
+#: gcp:55
 msgid ""
 "Progress bar deactivated\n"
 "--\n"
@@ -38,238 +42,245 @@ msgstr ""
 "Barre de progression désactivée\n"
 "--\n"
 
-#: gcp:88
+#: gcp:90
 msgid "Init DbusObject..."
-msgstr "Initialisation de «DbusObject»"
+msgstr "Initialisation de DbusObject..."
 
-#: gcp:109
+#: gcp:111
 msgid "INTERNAL ERROR: invalid arguments"
 msgstr "ERREUR INTERNE : arguments invalides"
 
-#: gcp:114
+#: gcp:116
 msgid "INTERNAL ERROR: invalid source_dir"
 msgstr "ERREUR INTERNE : chemin source invalide"
 
-#: gcp:169
+#: gcp:171
 msgid "/!\\ THE FOLLOWING FILES WERE *NOT* SUCCESSFULY COPIED:"
 msgstr "/!\\ LES FICHIERS SUIVANTS N'ONT *PAS* ÉTÉ COPIÉS :"
 
-#: gcp:175
+#: gcp:177
 msgid "The following files were copied, but some errors happened:"
-msgstr ""
-"Les fichiers suivant ont été copiés, mais quelques erreurs sont survenues :"
+msgstr "Les fichiers suivant ont été copiés, mais des erreurs sont survenues :"
 
-#: gcp:181
+#: gcp:183
 #, python-format
 msgid "Please check journal: %s"
 msgstr "Merci de vérifier le journal : %s"
 
-#: gcp:203
+#: gcp:205
 msgid "gcp launched"
 msgstr "gcp lancé"
 
-#: gcp:211
+#: gcp:213
 msgid "Init DBus..."
-msgstr "Initialisation de Dbus..."
+msgstr "Initialisation de DBus..."
 
-#: gcp:241
+#: gcp:244
 msgid "Can't read mounts table"
 msgstr "Impossible de lire la table des montages"
 
-#: gcp:248
+#: gcp:251
 #, python-format
 msgid "Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)"
 msgstr "Ajout à la liste des copies : %(path)s ==> %(dest_path)s (%(fs_type)s)"
 
-#: gcp:253
+#: gcp:258
 #, python-format
 msgid "Can't copy %(path)s: %(exception)s"
 msgstr "Impossible de copier %(path)s : %(exception)s"
 
-#: gcp:280
+#: gcp:286
 #, python-format
 msgid "Can't append %(path)s to copy list: %(exception)s"
 msgstr ""
-"Impossible d'ajouter %(path)s à la liste des fichiers à copier : %(exception)s"
+"Impossible d'ajouter %(path)s à la liste des fichiers à copier : "
+"%(exception)s"
 
-#: gcp:283
+#: gcp:289
 #, python-format
 msgid "Can't access %(dirpath)s: %(exception)s"
 msgstr "Impossible d'accéder à %(dirpath)s : %(exception)s"
 
-#: gcp:295
+#: gcp:301
 #, python-format
 msgid "Invalid dest_path: %s"
 msgstr "Chemin de destination invalide : %s"
 
-#: gcp:300
+#: gcp:306
 #, python-format
 msgid "The path given in arg doesn't exist or is not accessible: %s"
 msgstr "Le chemin donné en argument n'existe pas ou n'est pas accessible : %s"
 
-#: gcp:304
+#: gcp:310
 #, python-format
 msgid "omitting directory \"%s\""
-msgstr "Répertoire \"%s\" ignoré"
+msgstr "répertoire \"%s\" ignoré"
 
-#: gcp:329
+#: gcp:348
 #, python-format
 msgid "File [%s] already exists, skipping it!"
 msgstr "Le fichier [%s] existe déjà, je le saute !"
 
-#: gcp:347
+#: gcp:368
 #, python-format
 msgid "COPYING %(source)s ==> %(dest)s"
 msgstr "COPIE %(source)s ==> %(dest)s"
 
-#: gcp:447
+#: gcp:462
 #, python-format
 msgid "%.2f PiB"
 msgstr "%.2f Pio"
 
-#: gcp:449
+#: gcp:464
 #, python-format
 msgid "%.2f TiB"
 msgstr "%.2f Tio"
 
-#: gcp:451
+#: gcp:466
 #, python-format
 msgid "%.2f GiB"
 msgstr "%.2f Gio"
 
-#: gcp:453
+#: gcp:468
 #, python-format
 msgid "%.2f MiB"
 msgstr "%.2f Mio"
 
-#: gcp:455
+#: gcp:470
 #, python-format
 msgid "%.2f KiB"
 msgstr "%.2f Kio"
 
-#: gcp:457
+#: gcp:471
 #, python-format
 msgid "%i B"
 msgstr "%i o"
 
-#: gcp:465 gcp:470
+#: gcp:479 gcp:485
 #, python-format
 msgid "Copying %s"
 msgstr "Copie de %s"
 
-#: gcp:497 gcp:530
+#: gcp:515 gcp:548
 msgid ""
 "No saved sources with this name, check existing names with --sources-list"
 msgstr ""
 "Aucune sauvegarde de fichiers sources avec ce nom, veuillez vérifier les "
 "listes existantes avec --sources-list"
 
-#: gcp:507
+#: gcp:525
 msgid "Saved sources:"
 msgstr "Liste de sources sauvées :"
 
-#: gcp:521
+#: gcp:539
 msgid ""
 "There is already a saved sources with this name, skipping --sources-save"
 msgstr "Il y a déjà une liste de sources avec ce nom, --sources-save ignoré"
 
-#: gcp:557
-msgid "copy directories recursively"
-msgstr "copier les répertoire récursivement"
-
-#: gcp:561
+#: gcp:578
 msgid "force overwriting of existing files"
 msgstr "forcer le remplacement des fichiers déjà existants"
 
-#: gcp:565
+#: gcp:582
+msgid "always follow symbolic links in sources"
+msgstr "toujours suivre les liens symboliques"
+
+#: gcp:586
+msgid "never follow symbolic links in sources"
+msgstr "ne pas suivre les liens symboliques"
+
+#: gcp:590
 #, python-format
 msgid "same as --preserve=%s"
 msgstr "raccourci pour --preserve=%s"
 
-#: gcp:569
+#: gcp:594
 #, python-format
 msgid ""
-"preserve specified attributes; accepted values: 'all', or one or more "
-"amongst %s"
+"preserve specified attributes; accepted values:                    'all', or "
+"one or more amongst %s"
 msgstr ""
-"préserver les attributs spécifiés; valeurs acceptées : "
-"'all' ou un ou plusieurs éléments parmi %s"
+"préserver les attributs spécifiés; valeurs acceptées : 'all' ou un ou "
+"plusieurs éléments parmi %s"
 
-#: gcp:574
-msgid "always follow symbolic links in sources"
+#: gcp:599
+msgid "copy directories recursively"
+msgstr "copier les répertoire récursivement"
+
+#: gcp:603
+msgid "display what is being done"
+msgstr "afficher les opérations effectuées"
+
+#: gcp:614
+msgid ""
+"fix file names incompatible with the destination                    file "
+"system (default: auto)"
 msgstr ""
+"corriger les noms de fichiers incompatibles avec le système de fichiers "
+"cible (défaut : auto)"
 
-#: gcp:578
-msgid "never follow symbolic links in sources"
+#: gcp:619
+msgid ""
+"[DEPRECATED] same as --fix-filename=no (overrides                    --fix-"
+"filenames)"
 msgstr ""
+"[OBSOLÈTE] identique à --fix-filenames=no (--fix-filenames sera ignoré)"
 
-#: gcp:586
-msgid "fix filesystem name incompatibily (default: auto)"
-msgstr ""
-
-#: gcp:590
-msgid "same as --fs-fix=no (overrides --fs-fix)"
-msgstr "raccourci pour --fs-fix=no (--fs-fix sera ignoré)"
-
-#: gcp:594
+#: gcp:624
 msgid "disable progress bar"
 msgstr "désactiver la barre de progression"
 
-#: gcp:598
-msgid "Show what is currently done"
-msgstr "afficher les opérations effectuées"
-
-#: gcp:607
-msgid "Save source arguments"
+#: gcp:631
+msgid "save sources arguments"
 msgstr "sauvegarder la liste des fichiers source"
 
-#: gcp:611
-msgid "Save source arguments and replace memory if it already exists"
+#: gcp:635
+msgid "save sources arguments and replace memory if it already exists"
 msgstr ""
 "sauvegarder la liste des fichiers source et la remplacer si elle existe déjà"
 
-#: gcp:615
-msgid "Load source arguments"
+#: gcp:639
+msgid "load sources arguments"
 msgstr "réutiliser les fichiers source à copier"
 
-#: gcp:619
-msgid "delete saved sources"
+#: gcp:643
+msgid "delete saved sources list"
 msgstr "supprimer la liste des fichiers source"
 
-#: gcp:623
-msgid "List names of saved sources"
+#: gcp:647
+msgid "list names of saved sources"
 msgstr "afficher les noms des listes de fichiers source"
 
-#: gcp:627
-msgid "List names of saved sources and files in it"
+#: gcp:651
+msgid "list names of saved sources and files in it"
 msgstr ""
 "afficher les noms des listes de fichiers sources, en incluant les fichiers "
 "qu'elles contiennent"
 
-#: gcp:639
+#: gcp:663
 msgid "Progress bar is not available, deactivating"
 msgstr "La barre de progression n'est pas disponible, désactivation"
 
-#: gcp:663
+#: gcp:687
 #, python-format
 msgid "Invalid --preserve value '%s'"
 msgstr "Valeur de --preserve invalide « %s »"
 
-#: gcp:690
+#: gcp:714
 #, python-format
 msgid "There is already one instance of %s running, pluging to it"
 msgstr "Il y a déjà une instance de %s lancée, je m'y connecte"
 
-#: gcp:696
+#: gcp:720
 msgid "Wrong number of arguments"
 msgstr "Nombre d'arguments invalide"
 
-#: gcp:698
+#: gcp:722
 #, python-format
 msgid "adding args to gcp: %s"
 msgstr "ajout des arguments à gcp : %s"
 
-#: gcp:707
+#: gcp:731
 msgid "User interruption: good bye"
 msgstr "Interruption par l'utilisateur : au revoir"
 

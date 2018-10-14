@@ -600,7 +600,7 @@ class GCP():
         )
         group_cplike.add_argument("-v", "--verbose",
             action="store_true", default=False,
-            help=_("Show what is currently done")
+            help=_("display what is being done")
         )
         parser.add_argument_group(group_cplike)
 
@@ -628,27 +628,27 @@ class GCP():
         group_saving = parser.add_argument_group("sources saving")
         group_saving.add_argument("--sources-save",
             action="store",
-            help=_("Save source arguments")
+            help=_("save sources arguments")
         )
         group_saving.add_argument("--sources-replace",
             action="store",
-            help=_("Save source arguments and replace memory if it already exists")
+            help=_("save sources arguments and replace memory if it already exists")
         )
         group_saving.add_argument("--sources-load",
             action="store",
-            help=_("Load source arguments")
+            help=_("load sources arguments")
         )
         group_saving.add_argument("--sources-del",
             action="store",
-            help=_("delete saved sources")
+            help=_("delete saved sources list")
         )
         group_saving.add_argument("--sources-list",
             action="store_true", default=False,
-            help=_("List names of saved sources")
+            help=_("list names of saved sources")
         )
         group_saving.add_argument("--sources-full-list",
             action="store_true", default=False,
-            help=_("List names of saved sources and files in it")
+            help=_("list names of saved sources and files in it")
         )
         parser.add_argument_group(group_saving)
 
