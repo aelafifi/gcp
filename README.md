@@ -16,8 +16,8 @@ gcp is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-gcp. If not, see <http://www.gnu.org/licenses/>.
+You should have received a [copy of the GNU General Public License](LICENSE)
+along with gcp. If not, see <http://www.gnu.org/licenses/>.
 
 
 About
@@ -39,7 +39,7 @@ functionalities such as:
 - **Files saving**: you can keep track of the files you have copied, and copy
   them again later (useful when, for example, you copy some free music to your
   friends on a regular basis).
-- gcp will be **approximately option-compatible with cp** (approximately
+- gcp will be **approximately option-compatible with (GNU) cp** (approximately
   because the behaviour is not exactly the same, see below).
 
 **WARNING**: gcp is at a relatively early stage of development, use at your own
@@ -72,13 +72,14 @@ On Debian-based systems
 How to use it?
 ==============
 
-Pretty much like cp (see `gcp --help`).
+Pretty much like cp (see `gcp --help` and `man gcp`).
 
 Please note that the behaviour is not exactly the same as cp's, even if gcp
 aims to be option-compatible. Mainly, the destination filenames can be modified
 (cf. the `--fix-filenames` option).
 
-gcp doesn't implement all the options from cp yet, but it's a long-term goal.
+gcp doesn't implement all the options GNU cp has yet, but it's a long-term
+goal.
 
 
 Logging
