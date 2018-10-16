@@ -57,7 +57,7 @@ except ImportError as e:
 
 NAME = "gcp (Gcp CoPier)"
 NAME_SHORT = "gcp"
-VERSION = '0.2.0'
+VERSION = '0.2.1.dev1'
 
 ABOUT = NAME_SHORT + " " + VERSION + """
 ---
