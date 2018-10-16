@@ -81,7 +81,6 @@ const_JOURNAL_PATH = const_FILES_DIR + "/journal"
 const_SAVED_LIST = const_FILES_DIR + "/saved_list"
 
 
-
 class DbusObject(dbus.service.Object):
 
     def __init__(self, gcp, bus, path):
@@ -116,7 +115,9 @@ class DbusObject(dbus.service.Object):
             return (False, _("INTERNAL ERROR: invalid source_dir"))
         return self._gcp.parseArguments(args, source_dir)
 
+
 class Journal():
+
     def __init__(self, path=const_JOURNAL_PATH):
         self.journal_path = os.path.expanduser(path)
         self.journal_fd = open(self.journal_path,'w') #TODO: check and maybe save previous journals
@@ -181,8 +182,6 @@ class Journal():
 
         if failed or partial:
             info(_("Please check journal: %s") % self.journal_path)
-
-
 
 
 class GCP():
@@ -257,7 +256,6 @@ class GCP():
         except OSError as e:
             error(_("Can't copy %(path)s: %(exception)s")
                   % {'path':path, 'exception':e.strerror})
-
 
     def __appendDirToList(self, dirpath, dest_path, options):
         """Add recursively directory to the copy list
@@ -376,8 +374,6 @@ class GCP():
         self.journal.closeFile()
         source_fd.close()
         dest_fd.close()
-
-
 
     def _copyFile(self, source_fd, condition, data):
         """Actually copy the file, callback used with io_add_watch
@@ -519,7 +515,6 @@ class GCP():
                     pickle.dump(saved_files,saved_fd)
             if not args:
                 exit(0)
-
 
         if options.sources_list or options.sources_full_list:
             info(_('Saved sources:'))
@@ -752,4 +747,3 @@ if __name__ == "__main__":
             exit(1)
         if gcp.journal.partial:
             exit(2)
-
