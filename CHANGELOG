@@ -1,3 +1,8 @@
+gcp 0.2.1 (2019-03-10, Matteo Cypriani):
+- fix deprecation warnings with dbus.glib
+  see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=923677
+- minor documentation (README) improvements
+
 gcp 0.2.0 (2018-10-14, Matteo Cypriani):
 - actually switch to Python3
 - cp compatibibility:
