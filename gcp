@@ -5,7 +5,7 @@ gcp: Gcp CoPier
 Copyright (c) 2010, 2011  Jérôme Poisson <goffi@goffi.org>
           (c) 2011        Thomas Preud'homme <robotux@celest.fr>
           (c) 2016        Jingbei Li <i@jingbei.li>
-          (c) 2018        Matteo Cypriani <mcy@lm7.fr>
+          (c) 2018, 2019  Matteo Cypriani <mcy@lm7.fr>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,12 +36,11 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 gettext.install('gcp', "i18n")
 
 try:
-    from gi.repository import GObject
-    #DBus
-    import dbus
-    import dbus.glib
+    from gi.repository import GLib
+    from dbus.mainloop.glib import DBusGMainLoop
+    DBusGMainLoop(set_as_default=True)
     import dbus.service
-    import dbus.mainloop.glib
+    import dbus
 except ImportError as e:
     error(_("Error during import"))
     error(_("Please check dependecies:"), e)
@@ -359,9 +358,9 @@ class GCP():
             source_fd.close()
             return True
 
-        GObject.io_add_watch(source_fd, GObject.IO_IN,self._copyFile,
-                             (dest_fd, options),
-                             priority=GObject.PRIORITY_DEFAULT)
+        GLib.io_add_watch(source_fd, GLib.IO_IN,self._copyFile,
+                          (dest_fd, options),
+                          priority=GLib.PRIORITY_DEFAULT)
         if not self.progress:
             info(_("COPYING %(source)s ==> %(dest)s")
                  % {"source":source_file, "dest":dest_file})
@@ -718,7 +717,7 @@ class GCP():
             self.__checkArgs(options, source_dir, args)
             if not self.__launched:
                 self.journal = Journal()
-                GObject.idle_add(self.__copyNextFile)
+                GLib.idle_add(self.__copyNextFile)
                 self.__launched = True
         return (True,'')
 
@@ -728,7 +727,7 @@ class GCP():
 
     def go(self):
         """Launch main loop"""
-        self.loop = GObject.MainLoop()
+        self.loop = GLib.MainLoop()
         try:
             self.loop.run()
         except KeyboardInterrupt:
