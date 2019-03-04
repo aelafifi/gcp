@@ -6,7 +6,7 @@ name = 'gcp'
 
 setuptools.setup(
     name=name,
-    version='0.2.1.dev1',
+    version='0.2.1',
     url='https://code.lm7.fr/mcy/gcp',
     license='GPL-3+',
 
