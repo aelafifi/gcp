@@ -28,6 +28,7 @@ import gettext
 
 import sys
 import os
+import fnmatch
 import os.path
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 import pickle
@@ -214,6 +215,7 @@ class GCP():
         self.dbus_object = DbusObject(self, session_bus, const_DBUS_PATH)
 
         self.copy_list = []
+        self.ignore_list = []
         self.mounts = self.__getMountPoints()
         self.bytes_total = 0
         self.bytes_copied = 0
@@ -242,10 +244,36 @@ class GCP():
             error (_("Can't read mounts table"))
         return ret
 
+    def __fetchDotIgnoreFile(self, path):
+        """Open and read dot_ignore file entries
+        @param path: absolute path of file"""
+        for line in open(path):
+            line = line.strip()
+            if line == "" or line[0] == "#":
+                # Skip empty lines and comment lines
+                continue
+            # Create an absolute path to force matching from the base directory of dot_ignore file
+            pattern = os.path.join(os.path.dirname(path), line)
+            self.ignore_list.append(pattern)
+
+    def __isIgnored(self, path):
+        """Check if the current path is ignored
+        @param path: absolute path of file/directory"""
+        for pattern in self.ignore_list:
+            if fnmatch.fnmatch(path, pattern):
+                debug(_("Ignore file: %s" % path))
+                return True
+        return False
+
     def __appendToList(self, path, dest_path, options):
         """Add a file to the copy list
         @param path: absolute path of file
         @param options: options as return by optparse"""
+
+        # Check if this file is ignored
+        if self.__isIgnored(path):
+            return
+
         debug(_("Adding to copy list: %(path)s ==> %(dest_path)s (%(fs_type)s)")
               % {"path":path, "dest_path":dest_path,
                  "fs_type":self.getFsType(dest_path)})
@@ -260,6 +288,17 @@ class GCP():
         """Add recursively directory to the copy list
         @param path: absolute path of dir
         @param options: options as return by optparse"""
+
+        # Check if this directory is ignored
+        if self.__isIgnored(dirpath):
+            return
+
+        # Check if this directory has dot_ignore file
+        if options.ignore:
+            ignore_filepath = os.path.join(dirpath, options.ignore)
+            if os.path.isfile(ignore_filepath):
+                self.__fetchDotIgnoreFile(ignore_filepath)
+
         #We first check that the dest path exists, and create it if needed
         dest_path = self.__fix_filenames(dest_path, options, no_journal=True)
         if not os.path.exists(dest_path):
@@ -269,6 +308,11 @@ class GCP():
         #      and skip file/write error in log if needed
         try:
             for filename in os.listdir(dirpath):
+                # Skip if this file is the dot_ignore
+                file_basename = os.path.basename(filename)
+                if file_basename == options.ignore:
+                    continue
+
                 filepath = os.path.join(dirpath,filename)
                 if os.path.islink(filepath) and not options.dereference:
                     debug ("Skippink symbolic dir: %s" % filepath)
@@ -591,6 +635,10 @@ class GCP():
         group_cplike.add_argument("-r", "-R", "--recursive",
             action="store_true", default=False,
             help=_("copy directories recursively")
+        )
+        group_cplike.add_argument("-i", "--ignore",
+              action="store", default=".gcpignore",
+              help=_("file name which holds ignored patterns for each directory (default: .gcpignore)")
         )
         group_cplike.add_argument("-v", "--verbose",
             action="store_true", default=False,
